@@ -1,0 +1,269 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+    #userStatusAccordion {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 280px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        z-index: 9999;
+    }
+
+        #userStatusAccordion .accordion-button {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            font-weight: 700;
+        }
+
+            #userStatusAccordion .accordion-button:not(.collapsed) {
+                color: white;
+                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            }
+
+    #userStatusBox {
+        height: 350px;
+        background: #fff;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-top: none;
+    }
+
+    .user-list {
+        padding: 15px 20px;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        cursor: default;
+        transition: background-color 0.3s ease;
+        border-radius: 8px;
+        padding: 6px 10px;
+    }
+
+        .user-item:hover {
+            background-color: #f0f4ff;
+        }
+
+    .user-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #2575fc;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin-right: 12px;
+        user-select: none;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #333;
+        user-select: text;
+    }
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner"> 
+                        <h3>@ViewBag.customerCount</h3>
+
+                        <p>Müşteriler</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person"></i>
+                    </div>
+                    <a href="/Customer/Index" class="small-box-footer">Daha Fazla Bilgi<i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@ViewBag.agencyCount</h3>
+
+                        <p>Acenteler</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <a href="/Agency/Index" class="small-box-footer">Daha Fazla Bilgi<i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@ViewBag.policyCount</h3>
+
+                        <p>Poliçeler</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <a href="/Policy/Index" class="small-box-footer">Daha Fazla Bilgi<i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-orange">
+                    <div class="inner">
+                        <h3>@ViewBag.policyTypeCount</h3>
+
+                        <p>Poliçe Türleri</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <a href="/PolicyType/Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-secondary">
+                    <div class="inner">
+                        <h3>@ViewBag.vehicleCount</h3>
+
+                        <p>Araçlar</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <a href="/Vehicle/Index" class="small-box-footer">Daha Fazla Bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>@ViewBag.housingCount</h3>
+
+                        <p>Konutlar</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-house"></i>
+                    </div>
+                    <a href="/Housing/Index" class="small-box-footer">Daha Fazla Bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3>@ViewBag.userCount</h3>
+
+                        <p>Kullanıcılar</p>
+                    </div>  
+                    <div class="icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <a href="/User/Index" class="small-box-footer">Daha Fazla Bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-gradient-navy">
+                    <div class="inner">
+                        <h3>@ViewBag.notificationCount</h3>
+
+                        <p>Bildirimler</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-bell"></i>
+                    </div>
+                    <a href="/Notification/Index" class="small-box-footer">Daha Fazla Bilgi <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <!-- ./col -->
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<div id="userStatusAccordion" class="accordion">
+    <div class="accordion-item" style="border-radius: 12px; border: 1px solid #ddd;">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                🟢 Online Kullanıcılar
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse collapse" aria-labelledby="headingOne" data-bs-parent="#userStatusAccordion">
+            <div id="userStatusBox">
+                <div class="user-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+         .withUrl("/userStatusHub")
+         .build();
+
+     connection.start().catch(err => console.error(err.toString()));
+
+     connection.on("UpdateUserList", function (userList) {
+         let html = "";
+         userList.forEach(userName => {
+             const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+             html += `
+                 <div class="user-item">
+                     <div class="user-icon">${initials}</div>
+                     <div class="user-name">${userName}</div>
+                 </div>`;
+         });
+         document.querySelector("#userStatusBox .user-list").innerHTML = html;
+     });
+
+     // const accordion = document.getElementById('userStatusAccordion');
+     // const header = accordion.querySelector('.accordion-button');
+
+     // let isDown = false, offsetX, offsetY;
+
+     // header.onmousedown = (e) => {
+     //     if (e.target.classList.contains('accordion-button')) {
+     //         isDown = true;
+     //         offsetX = e.clientX - accordion.offsetLeft;
+     //         offsetY = e.clientY - accordion.offsetTop;
+     //         document.body.style.userSelect = 'none';
+     //     }
+     // };
+
+     // document.onmouseup = () => {
+     //     isDown = false;
+     //     document.body.style.userSelect = '';
+     // };
+
+     // document.onmousemove = (e) => {
+     //     if (!isDown) return;
+     //     accordion.style.left = (e.clientX - offsetX) + 'px';
+     //     accordion.style.top = (e.clientY - offsetY) + 'px';
+     //     accordion.style.bottom = 'auto';
+     //     accordion.style.right = 'auto';
+     //     accordion.style.position = 'fixed';
+     // };
+
+</script>
+
+

@@ -1,0 +1,284 @@
+﻿@using EntityLayer.Concrete
+@model List<Policy>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Customer/Views/Shared/UserLayoutForCustomer.cshtml";
+}
+
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 100%;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+	th,td{
+		text-align:center;
+	}
+
+</style>
+
+<h1>Poliçelerim</h1>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="policyTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="text-align:center">Acente Adı</th>
+				<th style="text-align:center">Poliçe No</th>
+				<th style="text-align:center">Poliçe Türü</th>
+				<th style="text-align:center">Başlangıç Tarihi</th>
+				<th style="text-align:center;width:180px;">Bitiş Tarihi</th>
+				<th style="text-align:center">Bilgi</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var item in Model)
+			{
+				<tr>
+					<td>@item.Agency.Name</td>
+					<td>@item.PolicyNumber</td>
+					<td>@item.PolicyType.Name</td>
+					<td>@item.StartDate</td>
+					<td>@item.EndDate</td>
+					<td>
+						<button type="button" class="btn btn-primary rounded-circle" style="width: 40px; height: 40px; padding: 6px;" onclick="openInfoModal(this)"><i class="fa-solid fa-circle-info"></i></button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<!-- Information Modalı -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="infoModalLabel">Poliçe Bilgileri</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12">
+						<div style="display:flex; justify-content:center;">
+							<h5>Poliçe Bilgileri</h5>
+						</div>
+						<ul id="policyInfoList" class="mb-4 w-100">
+						</ul>
+					</div>
+					<div class="col-md-12">
+						<h5 id="vehicleOrHousingTitle" class="mt-4"></h5>
+						<ul id="additionalInfo" class="w-100">
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts
+{
+	<script>
+		function openInfoModal(button) {
+			var policyInfoList = document.getElementById("policyInfoList");
+			policyInfoList.innerHTML = "";
+
+			var additionalInfoList = document.getElementById("additionalInfo");
+			additionalInfoList.innerHTML = "";
+
+			var id =button.getAttribute("data-id");
+			var agencyName = button.getAttribute("data-agencyname");
+			var pdfUrl = button.getAttribute("data-pdfUrl");
+			var policyNumber = button.getAttribute("data-policynumber");
+			var policyTypeName = button.getAttribute("data-policytypename");
+			var startDate = button.getAttribute("data-startdate");
+			var endDate = button.getAttribute("data-enddate");
+			var grossPremium = button.getAttribute("data-grossPremium");
+			var netPremium = button.getAttribute("data-netPremium");
+			var commission = button.getAttribute("data-commission");
+			var customerName = button.getAttribute("data-customername");
+			var plate = button.getAttribute("data-plate");
+			var brand = button.getAttribute("data-brand");
+			var model = button.getAttribute("data-model");
+			var productionYear = button.getAttribute("data-productionyear");
+			var description = button.getAttribute("data-description");
+			var city = button.getAttribute("data-city");
+			var district = button.getAttribute("data-district");
+			var neighbourhood = button.getAttribute("data-neighbourhood");
+			var street = button.getAttribute("data-street");
+			var doornumber = button.getAttribute("data-doornumber");
+			var postalCode = button.getAttribute("data-postalcode");
+			var country = button.getAttribute("data-country");
+			var constructionYear = button.getAttribute("data-constructionyear");
+			var totalArea = button.getAttribute("data-totalarea");
+			var userName = button.getAttribute("data-username");
+			var docSerialNumber = button.getAttribute("data-docSerialNumber");
+			var buildingCoverageAmount = button.getAttribute("data-buildingCoverageAmount");
+			var furnitureCoverageAmount = button.getAttribute("data-furnitureCoverageAmount");
+
+			var policyInfos = `
+			<div class="table-responsive" style="width: 100%;">
+			  <table class="table table-bordered table-striped">
+				<thead class="table-dark">
+				  <tr>
+					<th style= "text-align:center;">Acente Adı</th>
+					<th style= "text-align:center;  width:120px;">Poliçe No</th>
+					<th style= "text-align:center">Poliçe Türü</th>
+					<th style= "text-align:center">Başlangıç Tarihi</th>
+					<th style= "text-align:center">Bitiş Tarihi</th>
+					<th style= "text-align:center">Müşteri</th>
+					<th style= "text-align:center">Kaydı Yapan Kullanıcı</th>
+				  </tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style= "text-align:center">${agencyName}</td>
+						<td style= "text-align:center">${policyNumber}</td>
+						<td style= "text-align:center">${policyTypeName}</td>
+						<td style= "text-align:center">${startDate}</td>
+						<td style= "text-align:center">${endDate}</td>
+						<td style= "text-align:center">${customerName}</td>
+						<td style= "text-align:center">${userName}</td>
+					</tr>
+				</tbody>
+			  </table>
+			</div>
+			<div class="table-responsive" style="width: 30%;">
+			  <table class="table table-bordered table-striped">
+				<thead class="table-dark">
+				  <tr>
+					<th style= "text-align:center;">Net Prim</th>
+					<th style= "text-align:center">Brüt Prim</th>
+					<th style= "text-align:center">Komisyon</th>
+				  </tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style= "text-align:center">${netPremium}₺</td>
+						<td style= "text-align:center">${grossPremium}₺</td>
+						<td style= "text-align:center">${commission}₺</td>
+					</tr>
+				</tbody>
+			  </table>
+			</div>
+
+			`;
+			policyInfoList.innerHTML = policyInfos;
+
+			if (plate) {
+				document.getElementById("vehicleOrHousingTitle").innerHTML = `<h5 class="text-center">Araç Bilgileri</h5>`;
+				additionalInfoList.innerHTML = `
+				<div class="table-responsive" style="width: 100%;">
+				  <table class="table table-bordered table-striped">
+					<thead class="table-dark">
+						<tr>
+							<th style= "text-align:center">Plaka</th>
+							<th style= "text-align:center">Marka</th>
+							<th style= "text-align:center">Model</th>
+							<th style= "text-align:center">Yıl</th>
+							<th style= "text-align:center">Belge Seri No</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${plate}</td>
+							<td style= "text-align:center">${brand}</td>
+							<td style= "text-align:center">${model}</td>
+							<td style= "text-align:center">${productionYear}</td>
+							<td style= "text-align:center">${docSerialNumber}</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				  <div class="form-group row mt-2">
+					<div class="col md-8">
+						<strong>Açıklama</strong>
+						<p>${description}</p>
+					</div>
+					<div class="col-md-4">
+						<label>PDF</label>
+						<input type="file" class="form-control" id="addPdf" data-id="${id}" />
+						${pdfUrl ? `<a href="${pdfUrl}" target="_blank" class="btn btn-primary mt-2">PDF'yi Görüntüle</a>` : ''}
+					</div>
+				  </div>
+				`;
+			} else if (country) {
+				document.getElementById("vehicleOrHousingTitle").innerHTML =`<h5 class="text-center">Konut Bilgileri</h5>`;
+				additionalInfoList.innerHTML = `
+				<div class="table-responsive" style="width: 100%;">
+				  <table class="table table-bordered table-striped">
+				  <thead class="table-dark">
+					<tr>
+						<th style= "text-align:center">Ülke</th>
+						<th style= "text-align:center">İl</th>
+						<th style= "text-align:center">İlçe</th>
+						<th style= "text-align:center">Mahalle/Sokak</th>
+						<th style= "text-align:center">Kapı Numarası</th>
+						<th style= "text-align:center">Posta Kodu</th>
+						<th style= "text-align:center">Yapım Yılı</th>
+						<th style= "text-align:center">Toplam Alan</th>
+					</tr>
+				  </thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${country}</td>
+							<td style= "text-align:center">${city}</td>
+							<td style= "text-align:center">${district}</td>
+							<td style= "text-align:center">${neighbourhood}</td>
+							<td style= "text-align:center">${doornumber}</td>
+							<td style= "text-align:center">${postalCode}</td>
+							<td style= "text-align:center">${constructionYear}</td>
+							<td style= "text-align:center">${totalArea}m²</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				<div class="table-responsive" style="width: 30%;">
+				  <table class="table table-bordered table-striped">
+				  <thead class="table-dark">
+					<tr>
+						<th style= "text-align:center">Bina Teminat</th>
+						<th style= "text-align:center">Emtia Teminat</th>
+					</tr>
+				  </thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${buildingCoverageAmount}₺</td>
+							<td style= "text-align:center">${furnitureCoverageAmount}₺</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				  <div class="form-group row mt-2">
+					<div class="col md-8">
+						<strong>Açıklama</strong>
+						<p>${description}</p>
+					</div>
+					<div class="col-md-4">
+						<label>PDF</label>
+						<input type="file" class="form-control" id="addPdf" data-id="${id}" />
+						${pdfUrl ? `<a href="${pdfUrl}" target="_blank" class="btn btn-primary mt-2">PDF'yi Görüntüle</a>` : ''}
+					</div>
+				  </div>
+				`;
+			} else {
+				// Eğer araç veya konut bilgisi yoksa başlığı ve içeriği boş bırakabilirsin
+				document.getElementById("vehicleOrHousingTitle").textContent = "";
+				additionalInfoList.innerHTML = "";
+			}
+
+			var infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+			infoModal.show();
+		}
+	</script>
+
+}

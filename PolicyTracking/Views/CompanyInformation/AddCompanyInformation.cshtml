@@ -1,0 +1,54 @@
+﻿@using PolicyTracking.ViewModels
+@model AddCompanyInformationViewModel
+@{
+	ViewData["Title"] = "AddCompanyInformation";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<form id ="AddForm">
+	<div class="form-group">
+		<label>Şirket Adı</label>
+		<input type="text" asp-for="companyName" class="form-control" />
+		<span class="text-danger" data-valmsg-for="companyName"></span>
+	</div>
+	<div class="form-group">
+		<label>Logo Yükle</label>
+		<input type="file" asp-for="imageUrl" class="form-control" />
+		<span class="text-danger" data-valmsg-for="imageUrl"></span>
+	</div>
+	<button type="submit" class="btn btn-primary">Kaydet</button>
+</form>
+
+@section Scripts {
+    <script>
+        $("#AddForm").submit(function (e) {
+            e.preventDefault();
+
+            const $form = $(this);
+            $form.find('span[data-valmsg-for]').text('');
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                type: "POST",
+                url: "/CompanyInformation/AddCompanyInformation",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Şirket Bilgileri Başarıyla Eklendi!");
+                    } else {
+                        response.errors.forEach(function (error) {
+                            $form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+                }
+            });
+        });
+    </script>
+
+}
+

@@ -1,0 +1,395 @@
+﻿@using PolicyTracking.ViewModels
+@model AddUserViewModel
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 90%;
+	}
+
+	th, td {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+</style>
+<h1>Kullanıcılar</h1>
+<button type="button" class="btn btn-primary mb-2" onclick="openAddModal(this)" style="float:right; width:175px;">Yeni Kullanıcı Ekle</button>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="userTable">
+		<thead class="table-dark">
+			<tr>
+				<th>İsim</th>
+				<th>Soyisim</th>
+				<th>Kullanıcı Adı</th>
+				<th>E-mail</th>
+				<th>Durum</th>
+				<th>Düzenle</th>
+				<th>Sil</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.AppUsers)
+			{
+				<tr>
+					<td>@item.Name</td>
+					<td>@item.Surname</td>
+					<td>@item.UserName</td>
+					<td>@item.Email</td>
+					<td>
+						@* <label class="badge @(item.Status ? "badge-success" : "badge-danger")">
+							@(item.Status ? "Aktif" : "Pasif")
+						</label> *@
+					</td>
+					<td>
+						<button class="btn btn-info" type="button" onclick="openUpdateModal(this)" data-id="@item.Id" data-name="@item.Name" data-surname="@item.Surname" data-username="@item.UserName" data-mail="@item.Email" data-passwordhash="@item.PasswordHash">Düzenle</button>
+					</td>
+					<td>
+						<button type="button" class="btn btn-danger" onclick="confirmDelete(@item.Id)">Sil</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Kullanıcı Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="AddForm">
+					<!--Müşteri Kullanıcı , Admin Kullanıcı-->
+					<div class="form-group mb-3 text-center">
+						<label class="fw-bold">Kullanıcı Türü</label><br />
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" id="userSelect" name="UserTypeId" value="1" onchange="radioChange()"/>
+							<label class="form-check-label" for="userSelect">Admin Kullanıcı</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" id="customerUserSelect" name="UserTypeId" value="2" onchange="radioChange()"/>
+							<label class="form-check-label" for="customerUserSelect">Müşteri Kullanıcı</label>
+						</div>
+					</div>
+					<div class="form-group text-center">
+						<span class="text-danger" data-valmsg-for="CustomerTypeId"></span>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>İsim</label>
+							<input type="text" class="form-control" asp-for="@Model.Name" placeholder="İsim" />
+							<span class="text-danger" data-valmsg-for="Name"></span>
+						</div>
+						<div class="col md-6">
+							<label>Soyisim</label>
+							<input type="text" class="form-control" asp-for="@Model.Surname" placeholder="Soyisim" />
+							<span class="text-danger" data-valmsg-for="Surname"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Kullanıcı Adı</label>
+							<input type="text" class="form-control" name="UserName" placeholder="Kullanıcı Adı" />
+							<span class="text-danger" data-valmsg-for="UserName"></span>
+						</div>
+						<div class="col md-6">
+							<label>E-Posta</label>
+							<input type="text" class="form-control" asp-for="@Model.Mail" placeholder="E-Posta" />
+							<span class="text-danger" data-valmsg-for="Mail"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Şifre</label>
+							<input type="password" class="form-control" asp-for="@Model.Password" placeholder="Şifre" />
+							<span class="text-danger" data-valmsg-for="Password"></span>
+						</div>
+						<div class="col md-6">
+							<label>Şifre Tekrar</label>
+							<input type="password" class="form-control" asp-for="@Model.ConfirmPassword" placeholder="Şifre Tekrar" />
+							<span class="text-danger" data-valmsg-for="ConfirmPassword"></span>
+						</div>
+					</div>
+
+					<div id ="customerUserField" style="display:none;">
+						<div class="form-group row">
+							<div class="col-md-6">
+								<label>Müşteri</label>
+								<select class="form-control select2" id="customerId" name="CustomerId" style="width: 100%;">
+									<option value="">Seçiniz</option>
+									@if (Model.CustomerList != null)
+									{
+										foreach (var user in Model.CustomerList)
+										{
+											<option value="@user.Value">@user.Text</option>
+										}
+									}
+								</select>
+							</div>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">Kullanıcı Düzenle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="UpdateForm">
+					<div class="form-group row">
+						<div class="col md-6">
+							<input name="Id" id="id" hidden />
+							<label>İsim</label>
+							<input type="text" class="form-control" id="name" name="Name" placeholder="İsim" />
+							<span class="text-danger" data-valmsg-for="Name"></span>
+						</div>
+						<div class="col md-6">
+							<label>Soyisim</label>
+							<input type="text" class="form-control" id="surname" name="Surname" placeholder="Soyisim" />
+							<span class="text-danger" data-valmsg-for="Surname"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Kullanıcı Adı</label>
+							<input type="text" class="form-control" id="username" name="UserName" placeholder="Kullanıcı Adı" />
+							<span class="text-danger" data-valmsg-for="UserName"></span>
+						</div>
+						<div class="col md-6">
+							<label>E-Posta</label>
+							<input type="text" class="form-control" id="mail" name="Email" placeholder="E-Posta" />
+							<span class="text-danger" data-valmsg-for="Email"></span>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section Scripts {
+	<script>
+		$(document).ready(function() {
+
+			$('#customerId').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#addModal')
+			});
+
+			$('#userTable').DataTable({
+				dom: 'Bfrtip',
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: 'Excel\'e Aktar',
+						titleAttr: 'Excel\'e Aktar',
+						className: 'btn btn-success'
+					},
+					{
+						extend: 'csvHtml5',
+						text: 'CSV\'ye Aktar',
+						titleAttr: 'CSV\'ye Aktar',
+						className: 'btn btn-primary'
+					},
+					{
+						extend: 'print',
+						text: 'Yazdır',
+						titleAttr: 'Yazdır',
+						className: 'btn btn-secondary'
+					}
+				],
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+				}
+			});
+		});
+
+		function openAddModal(button)
+			{
+				$("#addModal").modal("show");
+			};
+		//Add İçin Ajax
+			$("#AddForm").submit(function (e) {
+				e.preventDefault();
+				$('#AddForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/User/AddUser",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						console.log(response);
+						if (response.success) {
+							toastr.success("Kullanıcı Başarıyla Eklendi!");
+							$("#AddForm")[0].reset(); // 🔄 Formu sıfırla
+							$("#addModal").modal("hide");
+								$("#userTable").load(location.href + " #userTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+		// İnputları Dolu Getirmesi İçin
+		function openUpdateModal(button) {
+			$("#UpdateForm")[0].reset();
+			let id = button.getAttribute("data-id");
+			let Name = button.getAttribute("data-name");
+			let Surname = button.getAttribute("data-surname");
+			let Username = button.getAttribute("data-username");
+			let Mail = button.getAttribute("data-mail");
+
+			document.getElementById("id").value = id;
+			document.getElementById("name").value = Name;
+			document.getElementById("surname").value = Surname;
+			document.getElementById("username").value = Username;
+			document.getElementById("mail").value = Mail;
+
+			$("#updateModal").modal("show");
+		};
+
+		// Update İçin Ajax
+			$("#UpdateForm").submit(function (e) {
+				e.preventDefault();
+				$('#UpdateForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/User/EditUser",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Kullanıcı Bilgileri Başarıyla Değiştirildi!");
+							$("#UpdateForm")[0].reset();
+							$("#updateModal").modal("hide");
+							$("#userTable").load(location.href + " #userTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+
+			// Delete İçin Ajax ve SweetAlert
+		function confirmDelete(userId) {
+			Swal.fire({
+				title: 'Kullanıcı Silinecek ,Emin misiniz?',
+				text: "Bu işlem geri alınamaz!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Evet, sil!',
+				cancelButtonText: 'İptal'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$.ajax({
+						url: "/User/DeleteUser/" + userId,
+						method: 'POST',
+						success: function (response) {
+							if (response.success) {
+								toastr.success('Silme İşlemi Başarılı!');
+								$("#userTable").load(location.href + " #userTable");
+							} else {
+								toastr.error(response.errors.join('\n'));
+							}
+						},
+						error: function () {
+							toastr.error('Bir Hata Oluştu!');
+						}
+					});
+				}
+			});
+		}
+		$('#updateModal').on('hidden.bs.modal', function () {
+		$('#UpdateForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$('#addModal').on('hidden.bs.modal', function () {
+		$('#AddForm')[0].reset();
+		$('#AddForm').find('span[data-valmsg-for]').text('');
+		});
+
+		function togglePassword(passwordId)
+		{
+			const input =document.getElementById(passwordId);
+			if (input.type === "password")
+			{
+				input.type = "text";
+			}
+			else if (input.type === "text")
+			{
+				input.type = "password";
+			}
+		}
+
+		function radioChange()
+		{
+			if(document.getElementById("customerUserSelect").checked)
+			{
+				document.getElementById("customerUserField").style.display = "block";
+			}
+			else
+			{
+				document.getElementById("customerUserField").style.display = "none";
+			}
+		}
+	</script>
+}
+

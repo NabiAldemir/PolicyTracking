@@ -1,0 +1,191 @@
+﻿@model List<PolicyTracking.ViewModels.NotificationViewModel>
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 90%;
+	}
+
+	th, td {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+	.custom-calendar{
+		max-width : 1350px;
+		height:900px;
+		margin : 0 auto;
+	}
+</style>
+<h1>Bitiş Tarihi Yaklaşan Poliçeler</h1>
+<div id="calendar" class="custom-calendar"></div>
+@* <input type="search" id ="daysLeft" class="mb-3" placeholder="Kalan Gün Sayısı" />
+<button type="button" class="btn btn-success" onclick="FilterNotificationByDay()">Filtrele</button>
+
+<div class="table-responsive" id ="notificationTable">
+	<table class="table table-bordered table-striped" id="notificatonTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="text-align:center">Poliçe Türü</th>
+				<th style="text-align:center">Müşteri</th>
+				<th style="text-align:center">Bitiş Tarihi</th>
+				<th style="text-align:center">Kalan Gün Sayısı</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</div> *@
+
+<div class="modal fade" id="showNotificationModal" tabindex="-1" role="dialog" aria-labelledby="showNotificationModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Yaklaşan Poliçe Detayı</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+			</div>
+			<div class="modal-body" id="modalBodyContent">
+				<!-- Detaylar buraya gelecek -->
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section Scripts {
+	// <script>
+	// 			$(document).ready(function () {
+	// 		notificationTable = $('#notificatonTable').DataTable({
+	// 			dom: 'Bfrtip',
+	// 			buttons: [
+	// 				{
+	// 					extend: 'excelHtml5',
+	// 					text: 'Excel\'e Aktar',
+	// 					className: 'btn btn-success'
+	// 				},
+	// 				{
+	// 					extend: 'csvHtml5',
+	// 					text: 'CSV\'ye Aktar',
+	// 					className: 'btn btn-primary'
+	// 				},
+	// 				{
+	// 					extend: 'print',
+	// 					text: 'Yazdır',
+	// 					className: 'btn btn-secondary'
+	// 				}
+	// 			],
+	// 			language: {
+	// 				url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+	// 			},
+	// 			columnDefs: [
+	// 				{
+	// 					targets: '_all',
+	// 					className: 'text-center'
+	// 				}
+	// 			],
+	// 			columns: [
+	// 				{ data: 'policyType' },
+	// 				{ data: 'customerName' },
+	// 				{ data: 'endDate' },
+	// 				{ data: 'daysLeft' },
+	// 			]
+	// 		});
+
+
+	// 		window.FilterNotificationByDay = function () {
+	// 			var daysLeft = document.getElementById("daysLeft").value;
+
+	// 			$.ajax({
+	// 				type: "GET",
+	// 				url: "/Notification/GetFilteredNotifications",
+	// 				data: {
+	// 					daysLeft: daysLeft
+	// 				},
+	// 				dataType: "json",
+	// 				success: function (data) {
+	// 					notificationTable.clear().rows.add(data).draw();
+	// 				}
+	// 			});
+	// 		};
+	// 	});
+
+		  document.addEventListener('DOMContentLoaded', function() {
+		  var calendarEl = document.getElementById('calendar');
+		  var calendar = new FullCalendar.Calendar(calendarEl, {
+			initialView: 'dayGridMonth',
+			locale:'tr',
+			firstDay: 1,
+			  headerToolbar: {
+		  left: 'prev,next today',
+		  center: 'title',
+		  right : '',
+		},
+			   buttonText: {
+		  today: 'Bugün',
+		},
+		events:'/Notification/GetCalendarNotifications',
+		eventClick: function(info) {
+
+			const { policyType, customer, daysLeft,policyNumber } = info.event.extendedProps;
+			const title = info.event.title;
+			const date = info.event.start;
+			const formattedDate = date.toLocaleDateString('tr-TR');
+
+			const html = `
+							<div class="table-responsive">
+				  <table class="table table-bordered table-striped" id="notificatonTable">
+					  <thead class="table-dark">
+						  <tr>
+							  <th style="text-align:center">Poliçe Numarası</th>
+							  <th style="text-align:center">Poliçe Türü</th>
+							  <th style="text-align:center">Müşteri</th>
+							  <th style="text-align:center">Bitiş Tarihi</th>
+							  <th style="text-align:center">Kalan Gün Sayısı</th>
+							  <th style="text-align:center">Poliçeye Git</th>
+						  </tr>
+					  </thead>
+					  <tbody>
+							<tr>
+								<td style="text-align:center">${policyNumber}</td>
+								<td style="text-align:center">${policyType}</td>
+								<td style="text-align:center">${customer}</td>
+								<td style="text-align:center">${formattedDate}</td>
+								<td style="text-align:center">${daysLeft}</td>
+								<td style="text-align:center"><a class="btn btn-primary" onclick ="GoToFilterPolicies(this)" id="goToFilterPolicies" data-policyNumber="${policyNumber}">Poliçeye Git</a></td>
+							</tr>
+					  </tbody>
+				  </table>
+			  </div>
+			`;
+
+			document.getElementById("modalBodyContent").innerHTML = html;
+
+			// Bootstrap 5 modal açma
+			var modal = new bootstrap.Modal(document.getElementById('showNotificationModal'));
+			modal.show();
+			}
+		  });
+		  calendar.render();
+		});
+
+		function GoToFilterPolicies(button){
+			const policyNumber = button.getAttribute("data-policyNumber");
+			window.location.href = `/Policy/Index?policyNumber=${encodeURIComponent(policyNumber)}`;
+		}
+
+	</script>
+}
+

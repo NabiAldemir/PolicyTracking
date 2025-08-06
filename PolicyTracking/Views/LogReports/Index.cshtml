@@ -1,0 +1,341 @@
+﻿@using PolicyTracking.ViewModels
+@model LogViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 90%;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+
+	#logsTable tbody tr td{
+		width:30px;
+	}
+	.th .td {
+		text-align:center;
+	}
+</style>
+<h1>Loglar</h1>
+<div class="row mb-3" style="justify-content:center;">
+	<div class="col-md-2">
+		<label>Tablo Adı</label>
+		<select id="tableNameFilter" class="form-control">
+			<option value="">Seçiniz</option>
+			@foreach (var name in Model.TableNameList)
+			{
+				<option value="@name.Value">@name.Text</option>
+			}
+		</select>
+	</div>
+	<div class="col-md-2">
+		<label>Aksiyon Türü</label>
+		<select class="form-control select2" id="actionFilter" style="width: 100%;">
+			<option value="">Seçiniz</option>
+				@foreach (var action in Model.ActionList)
+				{
+					<option value="@action.Value">@action.Text</option>
+				}
+		</select>
+	</div>
+	<div class="col-md-2">
+		<label>Tarih</label>
+		<input type="date" class="form-control" id="dateFilter" placeholder="Tarih" />
+	</div>
+	<div class="col-md-2">
+		<label>Kullanıcı</label>
+		<select class="form-control select2" id="userFilter" style="width: 100%;">
+			<option value="">Seçiniz</option>
+				@foreach (var user in Model.UserList)
+				{
+					<option value="@user.Value">@user.Text</option>
+				}
+		</select>
+	</div>
+</div>
+<div style="display:flex; justify-content:center;">
+	<button id="filterBtn" class="btn btn-warning" onclick="loadFilteredLogs()">Filtrele</button>
+</div>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="logsTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="width:30px !important">Tablo Adı</th>
+				<th>Kullanıcı</th>
+				<th>İşlem Türü</th>
+				<th>Original Data</th>
+				<th>Changed Data</th>
+				<th>Açıklama</th>
+				<th>Tarih</th>
+				<th>Detay</th>
+			</tr>
+		</thead>
+		<tbody>
+			@* @foreach (var item in Model.LogList)
+			{
+				<tr>
+					<td>@item.TableName</td>
+					<td>
+						<label class="badge @(item.Actions.Name == "Add" ? "badge-primary" :
+                    item.Actions.Name == "Update" ? "badge-success" :
+                    item.Actions.Name == "Delete" ? "badge-danger" : "badge-secondary")">
+							@(item.Actions.Name)
+						</label>
+					</td>
+					<td class="d-none">@item.OriginalData</td>
+					<td class="d-none">@item.ChangedData</td>
+					<td>@item.AppUser.Name @item.AppUser.Surname</td>
+					<td>
+						<button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#logDetailModal"
+								data-original="@item.OriginalData"
+								data-changed="@item.ChangedData"
+								data-actionname="@item.Actions.Name">
+							🔍 Detay
+						</button>
+					</td>
+					<td>@item.Description</td>
+					<td>@item.CreateDate</td>
+				</tr>
+			} *@
+		</tbody>
+	</table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Log Detayları</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+			</div>
+			<div class="modal-body">
+				<h6>İşlem Türü: <span id="actionType" class="badge"></span></h6>
+				<hr />
+				<h6>Log Id: <span id="logId"></span></h6>
+				<hr />
+				<h6>Eski Değerler</h6>
+				<pre id="originalDataTable" class="bg-light p-2 rounded"></pre>
+				<h6>Yeni Değerler</h6>
+				<pre id="changedDataTable" class="bg-light p-2 rounded"></pre>
+			</div>
+		</div>
+	</div>
+</div>
+@section Scripts {
+	<script>
+			let dataTable;
+
+				$.fn.dataTable.ext.type.order['custom-date-pre'] = function (data) {
+			return moment(data, 'DD-MM-YYYY H:mm').valueOf();
+		};
+
+		$(document).ready(function () {
+			dataTable = $('#logsTable').DataTable({
+				dom: `
+				<"d-flex justify-content-between"
+					<"d-flex align-items-center gap-3"
+						<"ps-1 pe-3"l>
+						B
+					>
+					<"ms-5"f>
+				>
+				<" p-2"rt>
+				<"d-flex justify-content-between"
+					i
+					p
+				>`,
+				columnDefs : [
+					{targets: 0,width:"12%"},
+					{targets: 1,width:"20%"},
+					{targets: 4,width:"20%"},
+					{targets: 5,width:"20%"},
+					{targets: 6,width:"20%"},
+					{targets: 7,width:"20%"},
+					{targets: 2,width:"15%"},
+					{					 
+					targets:'_all',
+					className : 'text-center'
+					}
+				],
+				columns: [
+					{ data: 'tableName' },
+					{ data: 'userName' },
+					{
+						data: 'actionName',
+						render: function (data) {
+							let badgeClass =
+								data === "Add" ? "badge-primary" :
+								data === "Update" ? "badge-success" :
+								data === "Delete" ? "badge-danger" : "badge-secondary";
+							return `<label class="badge ${badgeClass}">${data}</label>`;
+						}
+					},
+					{ data: 'originalData', visible: false },
+					{ data: 'changedData', visible: false },
+					{ data: 'description' },
+					{ data: 'date',
+					type : 'custom-date'},
+					{
+						data:null,
+							render: function (data, col, row) {
+							return `
+									<button class="btn btn-outline-primary btn-sm" onclick="openLogDetailModal(this)"
+										data-changed ='${row.changedData || ''}'
+										data-original ='${row.originalData || ''}'
+										data-actionname="${row.actionName}"
+										data-id="${row.id}">
+										🔍 Detay
+									</button>`;
+						}
+					},
+					{ data: 'id', visible: false },
+				],
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: 'Excel\'e Aktar',
+						className: 'btn btn-success',
+						exportOptions: { columns: [0, 1, 2, 3, 4, 6, 7] }
+					},
+					{
+						extend: 'csvHtml5',
+						text: 'CSV\'ye Aktar',
+						className: 'btn btn-primary',
+						exportOptions: { columns: [0, 1, 2, 3, 4, 6, 7] }
+					},
+					{
+						extend: 'print',
+						text: 'Yazdır',
+						className: 'btn btn-secondary',
+						exportOptions: { columns: [0, 1, 2, 3, 4, 6, 7] }
+					}
+				],
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+				}
+			});
+		});
+
+				function openLogDetailModal(button){
+				const originalData = button.getAttribute('data-original');
+				const changedData = button.getAttribute('data-changed');
+				const actionType = button.getAttribute('data-actionname');
+				const Id = button.getAttribute("data-id");
+
+			document.getElementById('logId').innerHTML = Id;
+			document.getElementById('originalDataTable').innerHTML = renderTable(originalData);
+			document.getElementById('changedDataTable').innerHTML = renderTable(changedData);
+
+			const actionSpan = document.getElementById('actionType');
+			let badgeClass = 'bg-secondary';
+			let label = actionType;
+
+			switch (actionType.toLowerCase()) {
+				case 'add':
+					badgeClass = 'bg-primary';
+					break;
+				case 'update':
+					badgeClass = 'bg-success';
+					break;
+				case 'delete':
+					badgeClass = 'bg-danger';
+					break;
+			}
+
+			actionSpan.className = `badge ${badgeClass}`;
+			actionSpan.textContent = label;
+
+			$("#logDetailModal").modal("show");
+		}
+
+		function renderTable(jsonString) {
+			if (!jsonString) return "<p>Yok</p>";
+			let obj;
+			try {
+				obj = JSON.parse(jsonString);
+			} catch {
+				return "<p>Veri geçersiz</p>";
+			}
+
+			let table =
+			`<div class="table-responsive" style="max-height:70vh">
+			<table class="table table-bordered table-striped">
+				<tbody>`;
+			for (let key in obj) {
+				table += `<tr>
+							<th style="width: 40%">${formatKey(key)}</th>
+							<td>${obj[key] ?? ""}</td>
+						  </tr>`;
+			}
+			table += `</tbody></table></div>`;
+			return table;
+		}
+
+		function formatKey(key) {
+			return key
+				.replace(/([A-Z])/g, ' $1')  
+				.replace(/^./, str => str.toUpperCase()); 
+		}
+		function loadFilteredLogs() {
+			var actionId = $('#actionFilter').val();
+			var tableName = $('#tableNameFilter').val();
+			var userId = $('#userFilter').val();
+			var date = $('#dateFilter').val();
+
+			$.ajax({
+				url: '/LogReports/FilterLogs',
+				type: 'GET',
+				data: {
+					actionId: actionId,
+					tableName: tableName,
+					userId: userId,
+					date: date
+				},
+				success: function (data) {
+					dataTable.clear();
+					dataTable.rows.add(data); 
+					dataTable.draw();         
+				},
+				error: function () {
+					alert("Filtreleme sırasında bir hata oluştu.");
+				}
+			});
+		}
+		$(document).ready(function() {
+					$('#userFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+					});
+					$('#actionFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+					});
+					$('#tableNameFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+					});
+		});
+		document.addEventListener("DOMContentLoaded", function () {
+				flatpickr("#dateFilter", {
+					dateFormat: "d-m-Y",
+					locale: "tr"
+				});
+		});
+
+	</script>
+}

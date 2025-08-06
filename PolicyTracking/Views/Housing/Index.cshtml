@@ -1,0 +1,678 @@
+﻿@using PolicyTracking.ViewModels
+@model HousingViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+	}
+
+	th, td {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+</style>
+<h1>Konutlar</h1>
+<button type="button" id ="" class="btn btn-primary mb-2" onclick="openAddModal(this)" style="float:right; width:175px;">Yeni Konut Ekle</button>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="housingTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="text-align:center;">Ülke</th>
+				<th style="text-align:center;">Şehir</th>
+				<th style="text-align:center;">İlçe</th>
+				<th style="text-align:center;">Mahalle/Sokak</th>
+				<th style="text-align:center;">Cadde</th>
+				<th style="text-align:center;">Posta Kodu</th>
+				<th style="text-align:center;">Yapım Yılı</th>
+				<th style="text-align:center;">Toplam Alan</th>
+				<th style="text-align:center;">Müşteri</th>
+				<th style="text-align:center;">Durum</th>
+				<th style="text-align:center;">Düzenle</th>
+				<th style="text-align:center;">Sil</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.Housings)
+			{
+				<tr>
+					<td>@item.Country</td>
+					<td style="text-align:center;">@item.City</td>
+					<td style="text-align:center;">@item.District</td>
+					<td style="text-align:center;">@item.Neighbourhood</td>
+					<td style="text-align:center;">@item.Street</td>
+					<td style="text-align:center;">@item.PostalCode</td>
+					<td style="text-align:center;">@item.ConstructionYear</td>
+					<td style="text-align:center;">@item.TotalArea m²</td>
+					<td style="text-align:center;">@item.Customer.Name @item.Customer.Surname @item.Customer.CompanyName</td>
+					<td>
+						<label class="badge @(item.Status ? "badge-success" : "badge-danger")">
+							@(item.Status ? "Aktif" : "Pasif")
+						</label>
+					</td>
+					<td>
+						<button class="btn btn-info" type="button" onclick="openUpdateModal(this)" data-id="@item.Id" data-country="@item.Country" data-city="@item.City" data-postalcode="@item.PostalCode"
+								data-constructionyear="@item.ConstructionYear" data-totalarea="@item.TotalArea"
+						        data-neighbourhood="@item.Neighbourhood" data-street="@item.Street" data-district="@item.District" data-doornumber="@item.DoorNumber"
+								data-customerid="@item.CustomerId">
+							Düzenle
+						</button>
+					</td>
+					<td>
+						<button type="button" class="btn btn-danger" onclick="confirmDelete(@item.Id)">Sil</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Konut Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="AddForm">
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Ülke</label>
+							<input type="text" id ="countryVal" class="form-control" name="Country" placeholder="Ülke" autocomplete="off" readonly />
+							<span class="text-danger" data-valmsg-for="Country"></span>
+						</div>
+						<div class="col md-6">
+							<label>İl</label>
+							<select id="provinceAdd" name="City" class="form-control select2">
+								<option value="">İl Seçiniz</option>
+								@foreach (var province in Model.Cities)
+								{
+									<option value="@province.Value">@province.Text</option>
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="City"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>İlçe</label>
+							<select id="districtAdd" name="District" class="form-control select2">
+								<option value="">İlçe Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="District"></span>
+						</div>
+						<div class="col md-6">
+							<label>Mahalle/Sokak</label>
+							<select class="form-control select2" id="neighbourhoodAdd" name="Neighbourhood">
+								<option value="">Mahalle/Sokak Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="Neighbourhood"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Cadde</label>
+							<input type="text" class="form-control" name="Street" placeholder="Cadde" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Street"></span>
+						</div>
+						<div class="col md-6">
+							<label>Kapı Numarası</label>
+							<input type="text" class="form-control" name="DoorNumber" placeholder="Kapı Numarası" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="DoorNumber"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Posta Kodu</label>
+							<input type="text" class="form-control" name="PostalCode" placeholder="Posta Kodu" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="PostalCode"></span>
+						</div>
+						<div class="col md-6">
+							<label>Yapım Yılı</label>
+							<input type="text" class="form-control" name="ConstructionYear" placeholder="Yapım Yılı" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="ConstructionYear"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Toplam Alan (m²)</label>
+							<input type="text" class="form-control" name="TotalArea" placeholder="Toplam Alan (m²)" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="TotalArea"></span>
+						</div>
+						<div class="col-md-6">
+							<label>Müşteri</label>
+							<select class="form-control" name="CustomerId" id ="addCustomerId" style="width:100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.Customers != null)
+								{
+									foreach (var user in Model.Customers)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="CustomerId"></span>
+						</div>
+						</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">Konut Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="UpdateForm">
+					<div class="form-group row">
+						<input name="Id" id ="id" hidden />
+						<div class="col md-6">
+							<label>Ülke</label>
+							<input type="text" class="form-control" id ="country" name="Country" placeholder="Ülke" autocomplete="off" readonly />
+							<span class="text-danger" data-valmsg-for="Country"></span>
+						</div>
+						<div class="col md-6">
+							<label>İl</label>
+							<select id="city" name="City" class="form-control select2">
+								<option value="">İl Seçiniz</option>
+								@foreach (var province in Model.Cities)
+								{
+									<option value="@province.Value">@province.Text</option>
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="City"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>İlçe</label>
+							<select id="district" name="District" class="form-control select2">
+								<option value="">İlçe Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="District"></span>
+						</div>
+						<div class="col md-6">
+							<label>Mahalle/Sokak</label>
+							<select id="neighbourhood" name="Neighbourhood" class="form-control select2">
+								<option value="">Mahalle Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="Neighbourhood"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Street</label>
+							<input type="text" class="form-control" id="street" name="Street" placeholder="Cadde" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Street"></span>
+						</div>
+						<div class="col md-6">
+							<label>Kapı Numarası</label>
+							<input type="text" class="form-control" id="doorNumber" name="DoorNumber" placeholder="Kapı Numarası" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="DoorNumber"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Posta Kodu</label>
+							<input type="text" class="form-control" id="postalCode" name="PostalCode" placeholder="Posta Kodu" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="PostalCode"></span>
+						</div>
+						<div class="col md-6">
+							<label>Yapım Yılı</label>
+							<input type="text" class="form-control" id="constructionYear" name="ConstructionYear" placeholder="Yapım Yılı" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="ConstructionYear"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Toplam Alan (m²)</label>
+							<input type="text" class="form-control" id="totalArea" name="TotalArea" placeholder="Toplam Alan (m²)" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="TotalArea"></span>
+						</div>
+						<div class="col-md-6">
+							<label>Müşteri</label>
+							<select class="form-control" id="updateCustomerId" name="CustomerId" style="width:100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.Customers != null)
+								{
+									foreach (var user in Model.Customers)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="CustomerId"></span>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts{
+	<script>
+		$(document).ready(function() {
+			$('#housingTable').DataTable({
+				dom: `
+				<"d-flex justify-content-between"
+					<"d-flex align-items-center gap-3"
+						<"ps-1 pe-3"l>
+						B
+					>
+					<"ms-5"f>
+				>
+				<" p-2"rt>
+				<"d-flex justify-content-between"
+					i
+					p
+				>`,
+				lengthMenu:[[10,25,50,-1],[10,25,50,"Tümü"]],
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: 'Excel\'e Aktar',
+						titleAttr: 'Excel\'e Aktar',
+						className: 'btn btn-success'
+					},
+					{
+						extend: 'csvHtml5',
+						text: 'CSV\'ye Aktar',
+						titleAttr: 'CSV\'ye Aktar',
+						className: 'btn btn-primary'
+					},
+					{
+						extend: 'print',
+						text: 'Yazdır',
+						titleAttr: 'Yazdır',
+						className: 'btn btn-secondary'
+					}
+				],
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+				}
+			});
+			const $btn = $('<button>', {
+			id: 'konutEkleBtn',
+			text: 'Yeni Konut Ekle',
+			class: 'btn btn-primary'
+		});
+		});
+
+		function openAddModal(button)
+			{
+				$("#addModal").modal("show");
+				$("#countryVal").val("TÜRKİYE");
+			};
+		//Add İçin Ajax
+			$("#AddForm").submit(function (e) {
+				e.preventDefault();
+				$('#AddForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/Housing/AddHousing",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Konut Başarıyla Eklendi!");
+							$("#AddForm")[0].reset(); // 🔄 Formu sıfırla
+							$("#addModal").modal("hide");
+								$("#housingTable").load(location.href + " #housingTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+
+			// Delete İçin Ajax ve SweetAlert
+				function confirmDelete(housingId) {
+					Swal.fire({
+						title: 'Konut Silinecek ,Emin misiniz?',
+						text: "Bu işlem geri alınamaz!",
+						icon: 'warning',
+						showCancelButton: true,
+						confirmButtonColor: '#d33',
+						cancelButtonColor: '#3085d6',
+						confirmButtonText: 'Evet, sil!',
+						cancelButtonText: 'İptal'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							$.ajax({
+								url: "/Housing/DeleteHousing/" + housingId,
+								method: 'POST',
+								success: function (response) {
+									if (response.success) {
+										toastr.success('Silme İşlemi Başarılı!');
+										$("#housingTable").load(location.href + " #housingTable");
+									} else {
+										toastr.error(response.errors.join('\n'));
+									}
+								},
+								error: function () {
+									toastr.error('Bir Hata Oluştu!');
+								}
+							});
+						}
+					});
+				}
+
+						// İnputları Dolu Getirmesi İçin
+		function openUpdateModal(button) {
+			let id = button.getAttribute("data-id");
+			let Country = button.getAttribute("data-country");
+			let City = button.getAttribute("data-city");
+			let District = button.getAttribute("data-district");
+			let Neighbourhood = button.getAttribute("data-neighbourhood");
+			let Street = button.getAttribute("data-street");
+			let PostalCode = button.getAttribute("data-postalcode");
+			let ConstructionYear = button.getAttribute("data-constructionyear");
+			let TotalArea = button.getAttribute("data-totalarea");
+			let DoorNumber = button.getAttribute("data-doornumber");
+			let CustomerId = button.getAttribute("data-customerid");
+
+			document.getElementById("id").value = id;
+			document.getElementById("country").value = Country;
+			fillLocationSelects(City,District,Neighbourhood);
+			document.getElementById("street").value = Street;
+			document.getElementById("postalCode").value = PostalCode;
+			document.getElementById("constructionYear").value = ConstructionYear;
+			document.getElementById("totalArea").value = TotalArea;
+			document.getElementById("doorNumber").value = DoorNumber;
+			$('#updateCustomerId').val(CustomerId).trigger('change');
+
+			$("#updateModal").modal("show");
+		};
+
+		// Update İçin Ajax
+			$("#UpdateForm").submit(function (e) {
+				e.preventDefault();
+				$('#UpdateForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/Housing/EditHousing",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Konut Bilgileri Başarıyla Değiştirildi!");
+							$("#updateModal").modal("hide");
+							$("#housingTable").load(location.href + " #housingTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+			$('#updateModal').on('hidden.bs.modal', function () {
+		$('#UpdateForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$('#addModal').on('hidden.bs.modal', function () {
+		$('#AddForm')[0].reset();
+		$('#AddForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$(document).ready(function() {
+					$('#addCustomerId').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+
+					$('#updateCustomerId').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#updateModal')
+					});
+				});
+
+		//Şehir,İl,İlçe için select change --Add Modal
+				 $("#provinceAdd").change(function () {
+					var provinceId = $(this).val();
+					$.getJSON('/Location/GetDistricts?provinceId=' + provinceId, function (data) {
+						var options = '<option value="">İlçe Seçiniz</option>';
+						$.each(data, function (i, item) {
+							options += '<option value="' + item.id + '">' + item.name + '</option>';
+						});
+						$("#districtAdd").html(options);
+						$("#neighborhoodAdd").html('<option value="">Mahalle Seçiniz</option>');
+					});
+				});
+
+				$("#districtAdd").change(function () {
+					var districtId = $(this).val();
+					$.getJSON('/Location/GetNeighborhoods?districtId=' + districtId, function (data) {
+						var options = '<option value="">Mahalle Seçiniz</option>';
+						$.each(data, function (i, item) {
+							options += '<option value="' + item.id + '">' + item.name + '</option>';
+						});
+						$("#neighbourhoodAdd").html(options);
+					});
+				});
+
+						//Şehir,İl,İlçe için select change --Update Modal
+						$("#city").change(async function () {
+							const provinceId = $(this).val();
+
+							if (!dontSetDistricts) {
+								try {
+									await getDistricts(provinceId);
+								} catch (error) {
+									console.error("İlçeler yüklenirken hata:", error);
+									}
+								}
+							});
+
+
+						function getDistricts(provinceId) {
+						return new Promise(function (resolve, reject) {
+						$.getJSON('/Location/GetDistricts?provinceId=' + provinceId, function (data) {
+							let options = '<option value="">İlçe Seçiniz</option>';
+							$.each(data, function (i, item) {
+								options += `<option value="${item.id}">${item.name}</option>`;
+							});
+							$("#district").html(options);
+							$("#neighbourhood").html('<option value="">Mahalle Seçiniz</option>');
+							resolve(); // işlem bitti
+							}).fail(function (jqXHR, textStatus, errorThrown) {
+							reject(errorThrown);
+							});
+							});
+						}
+
+
+						$("#district").change(async function () {
+							const districtId = $(this).val();
+							if(!dontSetNeighbourhood) await getNeighbourhoods(districtId);
+						});
+
+						function getNeighbourhoods(districtId) {
+							return new Promise(function (resolve, reject) {
+								$.getJSON('/Location/GetNeighborhoods?districtId=' + districtId, function (data) {
+									let options = '<option value="">Mahalle Seçiniz</option>';
+									$.each(data, function (i, item) {
+										options += `<option value="${item.id}">${item.name}</option>`;
+									});
+									$("#neighbourhood").html(options);
+									resolve();
+								}).fail(function (jqXHR, textStatus, errorThrown) {
+									reject(errorThrown);
+								});
+							});
+						}
+
+
+		$('#updateModal').on('shown.bs.modal', function () {
+			$('#city').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+			$('#district').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+			$('#neighbourhood').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+		});
+
+		$('#addModal').on('shown.bs.modal', function () {
+		$('#provinceAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+
+					$('#districtAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+					$('#neighbourhoodAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+		});
+
+		var dontSetDistricts = false;
+		var dontSetNeighbourhood = false;
+		async function fillLocationSelects(city, district, neighbourhood) {
+			try {
+				const response = await $.get('/Location/GetLocationIdToName', {
+					city: city,
+					district: district,
+					neighbourhood: neighbourhood
+				});
+
+
+						dontSetDistricts = true;
+						dontSetNeighbourhood = true;
+				$('#city').val(response.cityId).trigger('change');
+
+				await getDistricts(response.cityId);
+
+				$('#district').val(response.districtId).trigger('change');
+
+				await getNeighbourhoods(response.districtId);
+
+				$('#neighbourhood').val(response.neighbourhoodId).trigger('change');
+
+			} catch (error) {
+				console.error("Konumlar yüklenirken hata:", error);
+			}
+			finally {
+
+						dontSetDistricts = false;
+						dontSetNeighbourhood = false;
+			}
+		}
+		$('#updateModal').on('shown.bs.modal', function () {
+			$('#city').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+			$('#district').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+			$('#neighbourhood').select2({
+				placeholder: "Seçiniz",
+				allowClear: true,
+				minimumResultsForSearch: 0,
+				dropdownParent: $('#updateModal')
+			});
+		});
+
+		$('#addModal').on('shown.bs.modal', function () {
+		$('#provinceAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+
+					$('#districtAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+					$('#neighbourhoodAdd').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+		});
+	</script>
+}
+
+

@@ -1,0 +1,279 @@
+﻿@using PolicyTracking.ViewModels
+@model PolicyTypeViewModel
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 90%;
+	}
+
+	th, td {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+</style>
+<h1>Poliçe Türleri</h1>
+<button type="button" class="btn btn-primary mb-2" onclick="openAddModal(this)" style="float:right; width:175px;">Yeni Poliçe Türü Ekle</button>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="policyTypeTable">
+		<thead class="table-dark">
+			<tr>
+				<th>Poliçe Türü Adı</th>
+				<th>Durum</th>
+				<th>Düzenle</th>
+				<th>Sil</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.PolicyTypes)
+			{
+				<tr>
+					<td>@item.Name</td>
+					<td>
+						<label class="badge @(item.Status ? "badge-success" : "badge-danger")">
+							@(item.Status ? "Aktif" : "Pasif")
+						</label>
+					</td>
+					<td>
+						<button class="btn btn-info" type="button" onclick="openUpdateModal(this)" data-id="@item.Id" data-name="@item.Name">Düzenle</button>
+					</td>
+					<td>
+						<button type="button" class="btn btn-danger" onclick="confirmDelete(@item.Id)">Sil</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Poliçe Türü Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id ="AddForm">
+					<div class="form-group row">
+						<div class="col md-6">
+							<input hidden name="Id" />
+							<label>Poliçe Türü Adı</label>
+							<input type="text" class="form-control" asp-for="@Model.Name" placeholder="Poliçe Türü Adı" />
+							<span class="text-danger" data-valmsg-for="Name"></span>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">Poliçe Türü Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="UpdateForm">
+					<div class="form-group row">
+						<input hidden name="Id" id="id" />
+						<div class="col md-6">
+							<label>Poliçe Türü Adı</label>
+							<input type="text" class="form-control" name="Name" id="name" placeholder="Poliçe Türü Adı" />
+							<span class="text-danger" data-valmsg-for="Name"></span>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		$(document).ready(function() {
+			$('#policyTypeTable').DataTable({
+				dom: 'Bfrtip',
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: 'Excel\'e Aktar',
+						titleAttr: 'Excel\'e Aktar',
+						className: 'btn btn-success'
+					},
+					{
+						extend: 'csvHtml5',
+						text: 'CSV\'ye Aktar',
+						titleAttr: 'CSV\'ye Aktar',
+						className: 'btn btn-primary'
+					},
+					{
+						extend: 'print',
+						text: 'Yazdır',
+						titleAttr: 'Yazdır',
+						className: 'btn btn-secondary'
+					}
+				],
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+				}
+			});
+		});
+		function openAddModal(button)
+			{
+				$("#addModal").modal("show");
+			};
+
+		$(document).ready(function () {
+		@if (TempData["addSuccess"] != null)
+		{
+			<text>toastr.success('@TempData["addSuccess"]');</text>
+		}
+		@if (TempData["addError"] != null)
+		{
+			<text>toastr.error('@TempData["addError"]');</text>
+		}
+		});
+
+			// İnputları Dolu Getirmesi İçin
+		function openUpdateModal(button) {
+			let id = button.getAttribute("data-id");
+			let Name = button.getAttribute("data-name");
+
+			document.getElementById("id").value = id;
+			document.getElementById("name").value = Name;
+
+			$("#updateModal").modal("show");
+		};
+
+		// Add İçin Ajax
+			$("#AddForm").submit(function (e) {
+				e.preventDefault();
+				$('#AddForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/PolicyType/AddPolicyType",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Poliçe Türü Başarıyla Eklendi!");
+							$("#addModal").modal("hide");
+							$("#policyTypeTable").load(location.href + " #policyTypeTable");
+						} else {
+								response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+								}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+		// Update İçin Ajax
+			$("#UpdateForm").submit(function (e) {
+				e.preventDefault();
+				$('#UpdateForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/PolicyType/EditPolicyType",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Poliçe Türü Bilgileri Başarıyla Değiştirildi!");
+							$("#updateModal").modal("hide");
+							$("#policyTypeTable").load(location.href + " #policyTypeTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+
+				// Delete İçin Ajax ve SweetAlert
+		function confirmDelete(policyTypeId) {
+			Swal.fire({
+				title: 'Poliçe Türü Silinecek ,Emin misiniz?',
+				text: "Bu işlem geri alınamaz!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Evet, sil!',
+				cancelButtonText: 'İptal'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$.ajax({
+						url: "/PolicyType/DeletePolicyType/" + policyTypeId,
+						method: 'POST',
+						success: function (response) {
+							if (response.success) {
+								toastr.success('Silme İşlemi Başarılı!');
+								$("#policyTypeTable").load(location.href + " #policyTypeTable");
+							} else {
+								toastr.error(response.errors.join('\n'));
+							}
+						},
+						error: function () {
+							toastr.error('Bir Hata Oluştu!');
+						}
+					});
+				}
+			});
+		}
+		$('#updateModal').on('hidden.bs.modal', function () {
+		$('#UpdateForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$('#addModal').on('hidden.bs.modal', function () {
+		$('#AddForm')[0].reset();
+		$('#AddForm').find('span[data-valmsg-for]').text('');
+		});
+	</script>
+}
+
+
+

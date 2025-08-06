@@ -1,0 +1,197 @@
+﻿@model PolicyTracking.ViewModels.UpdateCustomerViewModel
+@{
+	Layout = null;
+}
+
+<form method="post" id="UpdateForm" asp-controller="Customer" asp-action="EditCustomer" onsubmit="submitForm(event)">
+	<!-- Müşteri Türü Seçimi -->
+	<div class="form-group mb-3 text-center">
+		<label class="fw-bold" style="text-align:center;">Müşteri Türü:</label><br />
+		<div class="form-check form-check-inline">
+			<input class="form-check-input" type="radio" asp-for="CustomerTypeId" value="1" onclick="return false;" />
+			<label class="form-check-label" for="individualSelect">Bireysel</label>
+		</div>
+		<div class="form-check form-check-inline">
+			<input class="form-check-input" type="radio" asp-for="CustomerTypeId" value="2" onclick="return false;" />
+			<label class="form-check-label" for="institutionalSelect">Kurumsal</label>
+			<span class="text-danger" data-valmsg-for="CustomerTypeId"></span>
+		</div>
+	</div>
+
+
+
+	@if (Model.CustomerTypeId == 1)
+	{
+		<!-- Bireysel Alanlar -->
+		<div id="individualFieldForUpdate">
+			<h6 class="fw-bold" style="text-align:center;">Bireysel Müşteri Bilgileri</h6>
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label>TC Kimlik No</label>
+					<input class="form-control" asp-for="IdentityNumber" placeholder="TC Kimlik No" />
+					<span class="text-danger" data-valmsg-for="IdentityNumber"></span>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label>Ad</label>
+					<input type="text" class="form-control" asp-for="Name" placeholder="Ad" />
+					<span class="text-danger" data-valmsg-for="Name"></span>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label>Soyad</label>
+					<input type="text" class="form-control" asp-for="Surname" placeholder="Soyad" />
+					<span class="text-danger" data-valmsg-for="Surname"></span>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label>Doğum Tarihi</label>
+					<input type="date" class="form-control" asp-for="DateOfBirth" placeholder="Doğum Tarihi" />
+					<span class="text-danger" data-valmsg-for="DateOfBirth"></span>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label>Cinsiyet</label>
+					<select type="date" class="form-control" asp-for="Gender" placeholder="Cinsiyet">
+						<option>Belirtilmemiş</option>
+						<option>Erkek</option>
+						<option>Kadın</option>
+					</select>
+					<span class="text-danger" data-valmsg-for="Gender"></span>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (Model.CustomerTypeId == 2)
+	{
+		<!-- Kurumsal Alanlar -->
+		<div id="institutionalFieldForUpdate">
+			<h6 class="fw-bold" style="text-align:center;">Kurumsal Müşteri Bilgileri</h6>
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label>Şirket Adı</label>
+					<input type="text" class="form-control" asp-for="CompanyName" placeholder="Şirket Adı" />
+					<span class="text-danger" data-valmsg-for="CompanyName"></span>
+				</div>
+			</div>
+		</div>
+	}
+
+	<!-- Ortak Alanlar -->
+	<div class="mt-4">
+		<h6 class="fw-bold" style="text-align:center;">İletişim ve Vergi Bilgileri</h6>
+		<div class="row">
+			<input asp-for="Id" hidden />
+			<div class="col-md-6 mb-3">
+				<label>Vergi Numarası</label>
+				<input type="text" class="form-control" asp-for="TaxNumber" placeholder="Vergi Numarası" />
+				<span class="text-danger" data-valmsg-for="TaxNumber"></span>
+			</div>
+			<div class="col-md-6 mb-3">
+				<label>Vergi Ofisi</label>
+				<input type="text" class="form-control" asp-for="TaxOffice" placeholder="Vergi Ofisi" />
+				<span class="text-danger" data-valmsg-for="TaxOffice"></span>
+			</div>
+			<div class="col-md-6 mb-3">
+				<label>Telefon Numarası 1</label>
+				<input type="text" class="form-control" asp-for="PhoneNumber1" placeholder="Telefon" />
+				<span class="text-danger" data-valmsg-for="PhoneNumber1"></span>
+			</div>
+			<div class="col-md-6 mb-3">
+				<label>Telefon Numarası 2</label>
+				<input type="text" class="form-control" asp-for="PhoneNumber2" placeholder="Telefon 2" />
+				<span class="text-danger" data-valmsg-for="PhoneNumber2"></span>
+			</div>
+			<div class="col-md-6 mb-3">
+				<label>E-Mail</label>
+				<input type="text" class="form-control" asp-for="Email" placeholder="Mail Adresi" />
+				<span class="text-danger" data-valmsg-for="Email"></span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Adres Alanları Container -->
+	<div id="addressContainerForUpdate">
+		@for (int i = 0; i < Model.Addresses.Count; i++)
+		{
+			<div class="mt-4 address-field" id="updateAddressField@(i)">
+				<div class="row mb-3" style="justify-content:center;">
+					<div class="col-md-4">
+						<input class="fw-bold form-control" style="text-align:center;" placeholder="Adres Başlığı" id="addressTitle@(i)" value="@Model.Addresses[@i].Title" name="Addresses[@i].Title" />
+					</div>
+				</div>
+				<button type="button" class="btn btn-danger btn-sm mb-2" onclick="removeUpdateAddressField(@i)">Adresi Sil</button>
+				<input value="@Model.Addresses[@i].Id" name="Addresses[@i].Id" hidden/>
+				<input value="@Model.Addresses[@i].CustomerId" name="Addresses[@i].CustomerId" hidden/>
+				<div class="form-group row">
+					<div class="col-md-4 mb-3">
+						<label>Ülke</label>
+						<input type="text" class="form-control" value="@Model.Addresses[@i].Country" name="Addresses[@i].Country" placeholder="Ülke" readonly/>
+						<span class="text-danger" data-valmsg-for="Addresses[@i].Country"></span>
+					</div>
+					<div class="col-md-4 mb-3 d-flex flex-column">
+						<label>İl</label>
+						<select id="city@(i)" value="@Model.Addresses[@i].City" data-index ="@i" name="Addresses[@i].City" class="form-control select2 province-select">
+							<option value="">İl Seçiniz</option>
+							@foreach (var city in Model.Cities)
+							{
+								<option value="@city.Value" selected="@(city.Text == Model.Addresses[i].City ? "selected" : null)">
+									@city.Text
+								</option>
+							}
+						</select>
+						<span class="text-danger" data-valmsg-for="Addresses[@i].City"></span>
+					</div>
+					<div class="col-md-4 mb-3 d-flex flex-column">
+						<label>İlçe</label>
+						<select id="district@(i)" class="form-control select2 district-select" data-index ="@i" value="@Model.Addresses[@i].District" name="Addresses[@i].District" placeholder="İlçe">
+							<option value="">İlçe Seçiniz</option>
+						</select>
+						<span class="text-danger" data-valmsg-for="Addresses[@i].District"></span>
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<div class="col-md-6 mb-3 d-flex flex-column">
+						<label>Mahalle/Sokak</label>
+						<select id="neighbourhood@(i)" class="form-control select2 " value="@Model.Addresses[@i].Neighbourhood" name="Addresses[@i].Neighbourhood" placeholder="Mahalle/Sokak">
+							<option value="">Mahalle/Sokak Seçiniz</option>
+						</select>
+						<span class="text-danger" data-valmsg-for="Addresses[@i].Neighbourhood"></span>
+					</div>
+					<div class="col-md-6 mb-3">
+						<label>Cadde</label>
+						<input type="text" class="form-control" value="@Model.Addresses[@i].Street" name="Addresses[@i].Street" placeholder="Cadde" />
+						<span class="text-danger" data-valmsg-for="Addresses[@i].Street"></span>
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<div class="col-md-6 mb-3">
+						<label>Kapı Numarası</label>
+						<input type="text" class="form-control" value="@Model.Addresses[@i].DoorNumber" name="Addresses[@i].DoorNumber" placeholder="Kapı Numarası" />
+						<span class="text-danger" data-valmsg-for="Addresses[@i].DoorNumber"></span>
+					</div>
+					<div class="col-md-6 mb-3">
+						<label>Posta Kodu</label>
+						<input type="text" class="form-control" value="@Model.Addresses[@i].PostalCode" name="Addresses[@i].PostalCode" placeholder="Posta Kodu" />
+						<span class="text-danger" data-valmsg-for="Addresses[@i].PostalCode"></span>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+
+	<input type="hidden" id="addressCount" value="@Model.Addresses.Count" />
+
+	<!-- Yeni Adres Ekle Butonu -->
+	<button type="button" class="btn btn-success mb-3" onclick="addNewAddressFieldForUpdate()">
+		Yeni Adres Ekle
+	</button>
+
+	<!-- Butonlar -->
+	<div class="text-end">
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+		<button type="submit" class="btn btn-primary">Kaydet</button>
+	</div>
+</form>
+
+<script>
+</script>

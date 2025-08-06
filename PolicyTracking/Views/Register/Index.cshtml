@@ -1,0 +1,65 @@
+﻿@model UserSignUpViewModel
+@{
+	Layout = null;
+}
+
+
+<head>
+	<link href="~/CoreBlogTema/web/css/bootstrap.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/single.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/style.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/fontawesome-all.css" rel="stylesheet">
+	<link href="//fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800"
+		  rel="stylesheet">
+</head>
+
+<section class="main-content-w3layouts-agileits">
+    <div class="container">
+        <h3 class="tittle">Kayıt Ol</h3>
+        <div class="row inner-sec">
+            <div class="login p-5 bg-light mx-auto mw-100">
+                <form method="post">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="exampleInputName" class="mb-2">Ad</label>
+                            <input type="text" class="form-control" placeholder="Adınız" asp-for="@Model.Name">
+                            <span class="text-danger" data-valmsg-for="Name">@Html.ValidationMessageFor(m => m.Name)</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exampleInputSurname" class="mb-2">Soyad</label>
+                            <input type="text" class="form-control" placeholder="Soyadınız" asp-for="@Model.Surname">
+                            <span class="text-danger" data-valmsg-for="Surname">@Html.ValidationMessageFor(m => m.Surname)</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="exampleInputEmail1 mb-2 col-md-6">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" placeholder="Kullanıcı Adı" asp-for="@Model.UserName">
+                            <span class="text-danger" data-valmsg-for="UserName">@Html.ValidationMessageFor(m => m.UserName)</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exampleInputPassword1 mb-2">E-Mail</label>
+                            <input type="text" class="form-control" placeholder="E-Mail" asp-for="@Model.Mail">
+                            <span class="text-danger" data-valmsg-for="Mail">@Html.ValidationMessageFor(m => m.Mail)</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="exampleInputPassword1 mb-2">Şifre</label>
+                            <input type="password" class="form-control" placeholder="Şifre" asp-for="@Model.Password">
+                            <span class="text-danger" data-valmsg-for="Password">@Html.ValidationMessageFor(m => m.Password)</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exampleInputPassword1 mb-2">Şifre Tekrar</label>
+                            <input type="password" class="form-control" placeholder="Şifre Tekrar" asp-for="@Model.ConfirmPassword">
+                            <span class="text-danger" data-valmsg-for="ConfirmPassword">@Html.ValidationMessageFor(m => m.ConfirmPassword)</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary submit mb-4">Kayıt Ol</button>
+                    <p><a href="/Account/Login">Zaten Bir Hesabın Var Mı?</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+

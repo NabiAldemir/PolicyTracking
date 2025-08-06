@@ -1,0 +1,65 @@
+﻿@model UserSignInViewModel
+@{
+	Layout = null;
+}
+<head>
+	<link href="~/CoreBlogTema/web/css/bootstrap.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/single.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/style.css" rel='stylesheet' type='text/css' />
+	<link href="~/CoreBlogTema/web/css/fontawesome-all.css" rel="stylesheet">
+	<link href="//fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800"
+		  rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+</head>
+
+<section class="main-content-w3layouts-agileits">
+	<div class="container">
+		<h3 class="tittle">Giriş Yap</h3>
+		<div class="row inner-sec">
+			<div class="login p-5 bg-light mx-auto mw-100">
+				<form method="post">
+					<div class="form-group">
+						<label for="exampleInputEmail1 mb-2">Kullanıcı Adı</label>
+						<input type="text" class="form-control" name="UserName" aria-describedby="emailHelp" placeholder="Kullanıcı Adı" autocomplete="off">
+						<span class="text-danger" data-valmsg-for="Username">@Html.ValidationMessageFor(m => m.Username)</span>
+					</div>
+					<div class="form-group">
+						<label for="exampleInputPassword1 mb-2">Şifre</label>
+						<input type="password" class="form-control" name="Password" id="exampleInputPassword1" placeholder="Şifre">
+						<span class="text-danger" data-valmsg-for="Password">@Html.ValidationMessageFor(m => m.Password)</span>
+					</div>
+					<div class="form-check mb-2">
+						<input type="checkbox" class="form-check-input" id="exampleCheck1">
+						<label class="form-check-label" for="exampleCheck1">Beni Hatırla</label>
+					</div>
+					<div class="g-recaptcha" data-sitekey="6LfgYjMrAAAAAK9jhxuFcfWXCcuA_R2uwDar8LOB"></div>
+					<button type="submit" class="btn btn-primary submit mb-4 mt-2">Giriş Yap</button>
+					<p><a href="/Register/Index">Bir Hesabın Yok Mu?</a></p>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+<script src="~/AdminLTE-3.0.4/plugins/jquery/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+	$(document).ready(function () {
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<text>toastr.success('@TempData["SuccessMessage"]');</text>
+	}
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<text>toastr.error('@TempData["ErrorMessage"]');</text>
+	}
+	@if (TempData["ErrorMessage1"] != null)
+	{
+		<text>toastr.error('@TempData["ErrorMessage1"]');</text>
+	}
+	@if (TempData["ErrorMessage2"] != null)
+	{
+		<text>toastr.error('@TempData["ErrorMessage2"]');</text>
+	}
+	});
+</script>

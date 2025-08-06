@@ -1,0 +1,1512 @@
+﻿@using Newtonsoft.Json
+@using PolicyTracking.ViewModels
+@model PolicyViewModel
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 100%;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+
+</style>
+
+
+<h1>Poliçeler</h1>
+<div class="row mb-3" style="justify-content:center;">
+	<div class="col-md-3">
+		<div class="accordion h-100" id="accordionExample1">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="headingOne">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+						Konut Alanları
+					</button>
+				</h2>
+				<div id="collapseOne" class="accordion-collapse collapse collapse" aria-labelledby="headingOne"
+					 data-bs-parent="#accordionExample">
+					<div class="accordion-body">
+						<div class="col-md-12">
+							<label>İl</label>
+							<select id="cityForFilter" name="City" class="form-control d-flex flex-column">
+								<option value="">İl Seçiniz</option>
+								@foreach (var province in Model.ProvinceList)
+								{
+									<option value="@province.Value">@province.Text</option>
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="City"></span>
+						</div>
+						<div class="col-md-12">
+							<label>İlçe</label>
+							<select id="districtForFilter" name="District" class="form-control d-flex flex-column">
+								<option value="">İlçe Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="District"></span>
+						</div>
+						<div class="col-md-12">
+							<label>Mahalle/Sokak</label>
+							<select id="neighbourhoodForFilter" name="Neighbourhood" class="form-control d-flex flex-column">
+								<option value="">Mahalle Seçiniz</option>
+							</select>
+							<span class="text-danger" data-valmsg-for="Neighbourhood"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="accordion h-100" id="accordionExample2">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="headingTwo">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+						Araç Alanları
+					</button>
+				</h2>
+				<div id="collapseTwo" class="accordion-collapse collapse collapse" aria-labelledby="headingTwo"
+					 data-bs-parent="#accordionExample">
+					<div class="accordion-body">
+						<div class="col md-2">
+							<label>Plaka</label>
+							<input type="search" class="form-control" id="plateForFilter" placeholder="Plaka" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="accordion h-100" id="accordionExample3">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="headingThree">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+						Tarih Alanları
+					</button>
+				</h2>
+				<div id="collapseThree" class="accordion-collapse collapse collapse" aria-labelledby="headingThree"
+					 data-bs-parent="#accordionExample">
+					<div class="accordion-body">
+						<div class="col-md-12 text-center">
+							<label class="fw-bold">Başlangıç Tarih Aralığı</label>
+							<div class="d-flex align-items-center justify-content-center">
+								<input type="date" class="form-control me-2" id="startDateFrom" placeholder="Başlangıç" />
+								<span class="mx-1">-</span>
+								<input type="date" class="form-control ms-2" id="startDateTo" placeholder="Bitiş" />
+							</div>
+						</div>
+						<div class="col-md-12 text-center">
+							<label class="fw-bold">Bitiş Tarih Aralığı</label>
+							<div class="d-flex align-items-center justify-content-center">
+								<input type="date" class="form-control me-2" id="endDateFrom" placeholder="Başlangıç" />
+								<span class="mx-1">-</span>
+								<input type="date" class="form-control ms-2" id="endDateTo" placeholder="Bitiş" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="accordion h-100" id="accordionExample4">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="headingFour">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+						Diğer Alanlar
+					</button>
+				</h2>
+				<div id="collapseFour" class="accordion-collapse collapse collapse" aria-labelledby="headingFour"
+					 data-bs-parent="#accordionExample">
+					<div class="accordion-body" style="max-height:200px; overflow-y:scroll;">
+						<div class="col md-12">
+							<label>Poliçe Numarası</label>
+							<input type="search" class="form-control" id="policyNumberForFilter" value="@Model.policyNumber" placeholder="Poliçe Numarası" />
+						</div>
+
+						<div class="col-md-12">
+							<label>Poliçe Türü</label>
+							<select id="policyTypeFilter" class="form-control">
+								<option value="">Seçiniz</option>
+								@foreach (var type in Model.PolicyTypeList)
+								{
+									<option value="@type.Value">@type.Text</option>
+								}
+							</select>
+						</div>
+						<div class="col-md-12">
+							<label>Acente Adı</label>
+							<select class="form-control select2" id="agencyFilter" style="width: 100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.AgnncyList != null)
+								{
+									foreach (var user in Model.AgnncyList)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+						</div>
+
+						<div class="col-md-12">
+							<label>Müşteri</label>
+							<select class="form-control select2" id="customerFilter" style="width: 100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.Customers != null)
+								{
+									foreach (var user in Model.Customers)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-2" style="margin-top:30px;">
+		<button id="filterBtn" class="btn btn-warning" onclick="loadFilteredPolicies()">Filtrele</button>
+	</div>
+</div>
+
+<button type="button" class="btn btn-primary mb-2" onclick="openAddModal(this)" style="float:right;width:176px;">Yeni Poliçe Ekle</button>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="policyTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="text-align:center">Acente Adı</th>
+				<th style="text-align:center">Poliçe No</th>
+				<th style="text-align:center">Poliçe Türü</th>
+				<th style="text-align:center">Başlangıç Tarihi</th>
+				<th style="text-align:center;width:180px;">Bitiş Tarihi</th>
+				<th style="text-align:center">Net Prim</th>
+				<th style="text-align:center">Brüt Prim</th>
+				<th style="text-align:center">Komisyon</th>
+				<th style="text-align:center">Müşteri</th>
+				<th style="text-align:center">Bilgi</th>
+				<th style="text-align:center">Düzenle</th>
+				<th style="text-align:center">Sil</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- JavaScript ile dolduruluyor -->
+		</tbody>
+	</table>
+</div>
+
+<!-- Add Modal -->
+<partial name="./Partials/AddModal" model="@Model" />
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel">
+	<div class="modal-dialog modal-lg">
+		<!-- Daha geniş modal -->
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Poliçe Düzenle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="UpdateForm">
+					<div class="form-group text-center">
+						<label>Poliçe Türü:</label><br />
+						@foreach (var item in Model.PolicyTypeList)
+						{
+							<input type="radio" id="update_@item.Value" name="selectType" value="@item.Value" onchange="toggleField()" required onclick="return false;" />
+							<label for="update@item.Text">@item.Text</label>
+						}
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-3">
+							<input hidden id="id" name="Id" />
+							<label>Acente Adı</label>
+							<select class="form-control select2" id="updateAgencyId" name="AgencyId" style="width: 100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.AgnncyList != null)
+								{
+									foreach (var user in Model.AgnncyList)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="AgencyId"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Poliçe Numarası</label>
+							<input type="text" class="form-control" name="PolicyNumber" id="policyNumber" placeholder="Poliçe Numarası" />
+							<span class="text-danger" data-valmsg-for="PolicyNumber"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Başlangıç Tarihi</label>
+							<input type="date" class="form-control" id="StartDate" name="StartDate" placeholder="Başlangıç Tarihi" />
+							<span class="text-danger" data-valmsg-for="StartDate"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Bitiş Tarihi</label>
+							<input type="date" class="form-control" id="EndDate" name="EndDate" placeholder="Bitiş Tarihi" />
+							<span class="text-danger" data-valmsg-for="EndDate"></span>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-4">
+							<label>Net Prim</label>
+							<input type="number" class="form-control" name="NetPremium" id="netPremium" placeholder="Net Prim" />
+							<span class="text-danger" data-valmsg-for="NetPremium"></span>
+						</div>
+						<div class="col-md-4">
+							<label>Brüt Prim</label>
+							<input type="number" class="form-control" name="GrossPremium" id="grossPremium" placeholder="Brüt Prim" />
+							<span class="text-danger" data-valmsg-for="GrossPremium"></span>
+						</div>
+						<div class="col-md-4">
+							<label>Komisyon</label>
+							<input type="number" class="form-control" name="Commission" id="commission" placeholder="Komisyon" />
+							<span class="text-danger" data-valmsg-for="Commission"></span>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-6">
+								<label>Müşteri</label>
+								<select class="form-control select2" id="updateCustomerId" name="CustomerId" style="width: 100%;">
+									<option value="">Seçiniz</option>
+									@if (Model.Customers != null)
+									{
+										foreach (var user in Model.Customers)
+										{
+											<option value="@user.Value">@user.Text</option>
+										}
+									}
+								</select>
+								<span class="text-danger" data-valmsg-for="CustomerId"></span>
+							</div>
+						</div>
+					</div>
+
+					<!-- ARAÇ ALANLARI -->
+					<div id="vehicleField" style="display:none;">
+						<hr />
+						<h5 style="text-align:center;">Araç Bilgileri</h5>
+						<div class="form-group row">
+							<input id="vehicleid" name="VehicleId" hidden />
+							<div class="col-md-4">
+								<label>Plaka</label>
+								<input type="text" class="form-control" name="Plate" id="plate" placeholder="Plaka" />
+								<span class="text-danger" data-valmsg-for="Plate"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Marka</label>
+								<input type="text" class="form-control" name="Brand" id="brand" placeholder="Marka" />
+								<span class="text-danger" data-valmsg-for="Brand"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Model</label>
+								<input type="text" class="form-control" name="Model" id="model" placeholder="Model" />
+								<span class="text-danger" data-valmsg-for="Model"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Yıl</label>
+								<input type="number" class="form-control" name="ProductionYear" id="productionYear" placeholder="Üretim Yılı" />
+								<span class="text-danger" data-valmsg-for="ProductionYear"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Belge Seri No</label>
+								<input type="text" class="form-control" name="DocSerialNumber" id="docSerialNumber" placeholder="Belge Seri Numarası" />
+								<span class="text-danger" data-valmsg-for="DocSerialNumber"></span>
+							</div>
+						</div>
+					</div>
+					<!-- KONUT ALANLARI -->
+					<div id="housingField" style="display:none;">
+						<hr />
+						<h5 style="text-align:center;">Konut Bilgileri</h5>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Ülke</label>
+								<input type="text" class="form-control" name="Country" id="country" placeholder="Ülke" readonly />
+								<span class="text-danger" data-valmsg-for="Country"></span>
+							</div>
+							<div class="col-md-4">
+								<label>İl</label>
+								<select id="city" name="City" class="form-control select2">
+									<option value="">İl Seçiniz</option>
+									@foreach (var province in Model.ProvinceList)
+									{
+										<option value="@province.Value">@province.Text</option>
+									}
+								</select>
+								<span class="text-danger" data-valmsg-for="City"></span>
+							</div>
+							<div class="col-md-4">
+								<label>İlçe</label>
+								<select id="district" name="District" class="form-control select2">
+									<option value="">İlçe Seçiniz</option>
+								</select>
+								<span class="text-danger" data-valmsg-for="District"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Mahalle/Sokak</label>
+								<select id="neighbourhood" name="Neighbourhood" class="form-control select2">
+									<option value="">Mahalle Seçiniz</option>
+								</select>
+								<span class="text-danger" data-valmsg-for="Neighbourhood"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Cadde</label>
+								<input type="text" class="form-control" name="Street" id="street" placeholder="Cadde" />
+								<span class="text-danger" data-valmsg-for="Street"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Kapı Numarası</label>
+								<input type="text" class="form-control" name="DoorNumber" id="doorNumber" placeholder="Kapı Numarası" />
+								<span class="text-danger" data-valmsg-for="DoorNumber"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Posta Kodu</label>
+								<input type="text" class="form-control" name="PostalCode" id="postalCode" placeholder="Posta Kodu" />
+								<span class="text-danger" data-valmsg-for="PostalCode"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Yapım Yılı</label>
+								<input type="text" class="form-control" name="ConstructionYear" id="constructionYear" placeholder="Yapım Yılı" />
+								<span class="text-danger" data-valmsg-for="ConstructionYear"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Toplam Alan (m²)</label>
+								<input type="text" class="form-control" name="TotalArea" id="totalArea" placeholder="Alan (m²)" />
+								<span class="text-danger" data-valmsg-for="TotalArea"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Bina Teminat</label>
+								<input type="text" class="form-control" name="BuildingCoverageAmount" id="buildingCoverageAmount" placeholder="Bina Teminat" />
+								<span class="text-danger" data-valmsg-for="BuildingCoverageAmount "></span>
+							</div>
+							<div class="col-md-4">
+								<label>Eşya Teminat</label>
+								<input type="text" class="form-control" name="FurnitureCoverageAmount" id = "furnitureCoverageAmount" placeholder="Eşya Teminat" />
+								<span class="text-danger" data-valmsg-for="FurnitureCoverageAmount  "></span>
+							</div>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-12">
+							<label>Açıklama</label>
+							<textarea class="form-control" name="Description" placeholder="Açıklama" id="description"></textarea>
+						</div>
+					</div>
+
+					<div class="text-end mt-3">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+						<button type="submit" class="btn btn-primary">Kaydet</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Information Modalı -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="infoModalLabel">Poliçe Bilgileri</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12">
+						<div style="display:flex; justify-content:center;">
+							<h5>Poliçe Bilgileri</h5>
+						</div>
+						<ul id="policyInfoList" class="mb-4 w-100">
+						</ul>
+					</div>
+					<div class="col-md-12">
+						<h5 id="vehicleOrHousingTitle" class="mt-4"></h5>
+						<ul id="additionalInfo" class="w-100">
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Modal title</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>Modal body text goes here.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts {
+
+	<script>
+						let policyTable;
+
+				$(document).ready(function () {
+
+					$('#cityForFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#accordionExample1'),
+						width: '100%'
+					});
+
+
+					$('#districtForFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#accordionExample1'),
+						width: '100%'
+					});
+
+
+					$('#neighbourhoodForFilter').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#accordionExample1'),
+						width: '100%'
+					});
+					policyTable = $('#policyTable').DataTable({
+						dom: 'Bfrtip',
+						buttons: [
+							{
+								extend: 'excelHtml5',
+								text: 'Excel\'e Aktar',
+								className: 'btn btn-success'
+							},
+							{
+								extend: 'csvHtml5',
+								text: 'CSV\'ye Aktar',
+								className: 'btn btn-primary'
+							},
+							{
+								extend: 'print',
+								text: 'Yazdır',
+								className: 'btn btn-secondary'
+							}
+						],
+						language: {
+							url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+						},
+						columnDefs:[
+							{targets: 3,width:"12%"},
+							{targets: 4,width:"12%"},
+							{
+								targets : '_all',
+								class : 'text-center'
+							}
+						],
+							columns: [
+							{data : 'agencyName'},
+							{data : 'policyNumber'},
+							{data : 'policyTypeName'},
+							{data : 'startDate'},
+							{data : 'endDate'},
+							{
+								data:'netPremium',
+								render : function(data){
+										return data + " "+ '₺'}
+							},
+							{
+								data:'grossPremium',
+								render : function(data){
+										return data + " "+ '₺'}
+							},
+							{
+								data:'commission',
+								render : function(data){
+										return data + " "+ '₺'}
+							},
+							{data : 'customerName'},
+							{
+								data: null,
+								render: function (data) {
+									return `
+									<button type="button" class="btn btn-primary rounded-circle" style="width: 40px; height: 40px; padding: 6px;"
+										onclick="openInfoModal(this)"
+										data-id="${data.id}"
+										data-agencyname="${data.agencyName}"
+										data-policynumber="${data.policyNumber}"
+										data-policytypename="${data.policyTypeName}"
+										data-startdate="${data.startDate}"
+										data-enddate="${data.endDate}"
+										data-netPremium="${data.netPremium}"
+										data-grossPremium="${data.grossPremium}"
+										data-commission="${data.commission}"
+										data-customername="${data.customerName}"
+										data-plate="${data.plate || ''}"
+										data-brand="${data.brand || ''}"
+										data-model="${data.model || ''}"
+										data-productionyear="${data.productionYear || ''}"
+										data-color="${data.color || ''}"
+										data-mileage="${data.mileage || ''}"
+										data-district="${data.district || ''}"
+										data-neighbourhood="${data.neighbourhood || ''}"
+										data-city="${data.city || ''}"
+										data-postalcode="${data.postalCode || ''}"
+										data-country="${data.country || ''}"
+										data-constructionyear="${data.constructionYear || ''}"
+										data-totalarea="${data.totalArea || ''}"
+										data-street="${data.street || ''}"
+										data-doornumber="${data.doorNumber || ''}"
+										data-docSerialNumber="${data.docSerialNumber || ''}"
+										data-description="${data.description || ''}"
+										data-pdfUrl="${data.pdfUrl || ''}"
+										data-buildingCoverageAmount="${data.buildingCoverageAmount || ''}"
+										data-furnitureCoverageAmount="${data.furnitureCoverageAmount || ''}"
+										data-username="${data.username || ''}">
+										<i class="fa-solid fa-circle-info"></i>
+									</button>`;
+								}
+							},
+							{
+								data: null,
+								render: function (data) {
+									return `
+									<button class="btn btn-info" type="button" onclick="openUpdateModal(this)"
+										data-id="${data.id}" data-agencyid="${data.agencyId}" data-policynumber="${data.policyNumber}"
+										data-startdate="${data.startDate}" data-enddate="${data.endDate}" data-netPremium="${data.netPremium}"
+										data-grossPremium="${data.grossPremium}" data-commission="${data.commission}"
+										data-customerid="${data.customerId}" data-policytypeid="${data.policyTypeId}"
+										data-plate="${data.plate || ''}" data-brand="${data.brand || ''}" data-model="${data.model || ''}"
+										data-productionyear="${data.productionYear || ''}" data-color="${data.color || ''}"
+										data-mileage="${data.mileage || ''}" data-district="${data.district || ''}"
+										data-neighbourhood="${data.neighbourhood || ''}" data-city="${data.city || ''}"
+										data-postalcode="${data.postalCode || ''}" data-country="${data.country || ''}"
+										data-constructionyear="${data.constructionYear || ''}" data-totalarea="${data.totalArea || ''}"
+										data-vehicleid="${data.vehicleId || ''}" data-street="${data.street || ''}"
+										data-doornumber="${data.doorNumber || ''}"
+										data-description="${data.description || ''}"
+										data-buildingCoverageAmount="${data.buildingCoverageAmount || ''}"
+										data-furnitureCoverageAmount="${data.furnitureCoverageAmount || ''}"
+										data-docSerialNumber="${data.docSerialNumber || ''}">
+										Düzenle
+									</button>`;
+								}
+							},
+							{
+								data: null,
+								render: function (data) {
+									return `<button type="button" class="btn btn-danger" onclick="confirmDelete(${data.id})">Sil</button>`;
+								}
+							}
+						]
+					});
+
+					if(document.getElementById("policyNumberForFilter").value.length > 0){
+						loadFilteredPolicies();
+					}
+
+				});
+
+				const StartDate = document.getElementById("StartDate");
+				const EndDate = document.getElementById("EndDate");
+				const startDate = document.getElementById("startDate");
+				const endDate = document.getElementById("endDate");
+				const startDateFrom = document.getElementById("startDateFrom");
+				const startInputTo = document.getElementById("startDateTo");
+				const endInputFrom = document.getElementById("endDateFrom");
+				const endInputTo = document.getElementById("endDateTo");
+
+				let startPickerTo;
+				let endPickerTo;
+
+				//Başlangıç Tarihi Validasyon
+				const startPickerFrom = flatpickr(startDateFrom,{
+					dateFormat:"d-m-Y",
+					locale:"tr",
+					onChange: function(selectedDates,dateStr,instance){
+						if (selectedDates.length > 0) {
+							// Bitiş tarihi için minimum tarihi ayarla
+							startPickerTo.set("minDate", dateStr);
+							endPickerFrom.set("minDate", dateStr);
+							endPickerTo.set("minDate", dateStr);
+						}
+					}
+				});
+
+
+				// Bitiş tarihi flatpickr'ı başlat
+				startPickerTo = flatpickr(startInputTo, {
+					dateFormat: "d-m-Y",
+					locale:"tr",
+					onChange: function(selectedDates,dateStr,instance){
+						if (selectedDates.length > 0) {
+							// Bitiş tarihi için minimum tarihi ayarla
+							endPickerFrom.set("minDate", dateStr);
+							endPickerTo.set("minDate", dateStr);
+						}
+					}
+				});
+
+				//Bitiş Tarihi Validasyon
+				const endPickerFrom = flatpickr(endInputFrom,{
+					dateFormat:"d-m-Y",
+					locale:"tr",
+					onChange: function(selectedDates,dateStr,instance){
+						if (selectedDates.length > 0) {
+							// Bitiş tarihi için minimum tarihi ayarla
+							endPickerTo.set("minDate", dateStr);
+						}
+					}
+				});
+
+
+				// Bitiş tarihi flatpickr'ı başlat
+				endPickerTo = flatpickr(endInputTo, {
+					dateFormat: "d-m-Y",
+					locale:"tr"
+				});
+
+
+				//Başlangıç Tarihi Validasyon --Add Modal
+				const startPicker = flatpickr(startDate,{
+					dateFormat:"d-m-Y",
+					locale:"tr",
+					onChange: function(selectedDates,dateStr,instance){
+						if (selectedDates.length > 0) {
+							// Bitiş tarihi için minimum tarihi ayarla
+							endPicker.set("minDate", dateStr);
+						}
+					}
+				});
+
+
+				// Bitiş tarihi flatpickr'ı başlat
+				const endPicker = flatpickr(endDate, {
+					dateFormat: "d-m-Y",
+					locale:"tr"
+				});
+
+
+				//Başlangıç Tarihi Validasyon --Update Modal
+				const startPickerForUpdate = flatpickr(StartDate,{
+					dateFormat:"d-m-Y",
+					locale:"tr",
+					onChange: function(selectedDates,dateStr,instance){
+						if (selectedDates.length > 0) {
+							// Bitiş tarihi için minimum tarihi ayarla
+							endPickerForUpdate.set("minDate", dateStr);
+						}
+					}
+				});
+
+
+				// Bitiş tarihi flatpickr'ı başlat
+				const endPickerForUpdate = flatpickr(EndDate, {
+					dateFormat: "d-m-Y",
+					locale:"tr"
+				});
+
+					function openAddModal(button)
+					{
+						$("#addModal").modal("show");
+					};
+
+					//Add İçin Ajax
+					$("#AddForm").submit(function (e) {
+						e.preventDefault();
+						$('#AddForm').on('change keyup', 'input, select', function () {
+						const fieldName = $(this).attr('name');
+						$(`span[data-valmsg-for="${fieldName}"]`).text('');
+						});
+						const $form = $(this);
+
+						$form.find('span[data-valmsg-for]').text('');
+
+						$.ajax({
+							type: "POST",
+							url: "/Policy/AddPolicy",
+							data: $(this).serialize(),
+							dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+							success: function (response) {
+								if (response.success) {
+									toastr.success("Poliçe Başarıyla Eklendi!");
+									$("#AddForm")[0].reset();
+									$("#addModal").modal("hide");
+									loadFilteredPolicies();
+										document.getElementById("vehicleFields").style.display = "none";
+										document.getElementById("housingFields").style.display = "none";
+								} else {
+									response.errors.forEach(function (error) {
+										$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+										});
+								}
+							},
+							error: function () {
+								Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+							}
+						});
+					});
+
+					// İnputları Dolu Getirmesi İçin
+					function openUpdateModal(button) {
+						let id = button.getAttribute("data-id");
+						let AgencyId = button.getAttribute("data-agencyid");
+						let PolicyNumber = button.getAttribute("data-policynumber");
+						let StartDate = button.getAttribute("data-startdate");
+						let EndDate = button.getAttribute("data-enddate");
+						let NetPremium = button.getAttribute("data-netPremium");
+						let GrossPremium = button.getAttribute("data-grossPremium");
+						let Commission = button.getAttribute("data-commission");
+						let CustomerId = button.getAttribute("data-customerid");
+						const policyTypeId = parseInt(button.getAttribute("data-policytypeid"));
+						let VehicleId=button.getAttribute("data-vehicleid");
+						let city =button.getAttribute("data-city");
+						let district =button.getAttribute("data-district");
+						let neighbourhood =button.getAttribute("data-neighbourhood");
+						let Description = button.getAttribute("data-description");
+
+						document.getElementById("id").value = id;
+						$('#updateCustomerId').val(CustomerId).trigger('change');
+						$('#updateAgencyId').val(AgencyId).trigger('change');
+						document.getElementById("policyNumber").value = PolicyNumber;
+						document.getElementById("StartDate").value = StartDate;
+						document.getElementById("EndDate").value =EndDate;
+						document.getElementById("netPremium").value = NetPremium;
+						document.getElementById("grossPremium").value = GrossPremium;
+						document.getElementById("commission").value = Commission;
+						document.getElementById("description").value = Description;
+						document.getElementById("vehicleid").value = VehicleId;
+
+							if  (policyTypeId == 3 || policyTypeId == 4 || policyTypeId == 5)  {
+								const updateId = policyTypeId == 2 ? "update_3" : (policyTypeId == 10 ? "update_4" : "update_5");
+								document.getElementById(updateId).checked = true;
+								document.getElementById("housingField").disabled = false;
+								document.getElementById("vehicleField").style.display = "none";
+								document.getElementById("housingField").style.display = "block";
+
+								document.getElementById("country").value = button.getAttribute("data-country");
+								fillLocationSelects(city, district, neighbourhood);
+								document.getElementById("street").value = button.getAttribute("data-street");
+								document.getElementById("constructionYear").value = button.getAttribute("data-constructionYear");
+								document.getElementById("totalArea").value = button.getAttribute("data-totalarea");
+								document.getElementById("doorNumber").value = button.getAttribute("data-doornumber");
+								document.getElementById("postalCode").value = button.getAttribute("data-postalcode");
+								document.getElementById("buildingCoverageAmount").value = button.getAttribute("data-buildingCoverageAmount");
+								document.getElementById("furnitureCoverageAmount").value = button.getAttribute("data-furnitureCoverageAmount");
+							}
+							else if (policyTypeId == 1 || policyTypeId == 2) {
+								const updateId = policyTypeId === 1 ? "update_1" : "update_2";
+								document.getElementById(updateId).checked = true;
+								document.getElementById("vehicleField").style.display = "block";
+								document.getElementById("housingField").style.display = "none";
+
+								document.getElementById("plate").value = button.getAttribute("data-plate") || "";
+								document.getElementById("brand").value = button.getAttribute("data-brand") || "";
+								document.getElementById("model").value = button.getAttribute("data-model") || "";
+								document.getElementById("productionYear").value = button.getAttribute("data-productionyear") || "";
+								document.getElementById("docSerialNumber").value = button.getAttribute("data-docserialnumber") || "";
+							}
+							else if(policyTypeId == 6)
+							{
+								document.getElementById("update_12").checked = true;
+								document.getElementById("vehicleField").style.display = "none";
+								document.getElementById("housingField").style.display = "none";
+							}
+
+
+						$("#updateModal").modal("show");
+					}
+
+
+					// function formatDate(dateStr) {
+					// 	if (!dateStr) return "";
+					// 	let date = new Date(dateStr);
+					// 	return date.toISOString().split('T')[0]; // yyyy-MM-dd
+					// }
+
+
+						// Update İçin Ajax
+							$("#UpdateForm").submit(function (e) {
+								e.preventDefault();
+								$('#UpdateForm').on('change keyup', 'input, select', function () {
+								const fieldName = $(this).attr('name');
+								$(`span[data-valmsg-for="${fieldName}"]`).text('');
+								});
+								const $form = $(this);
+
+								$form.find('span[data-valmsg-for]').text('');
+
+								$.ajax({
+									type: "POST",
+									url: "/Policy/EditPolicy",
+									data: $(this).serialize(),
+									dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+									success: function (response) {
+										if (response.success) {
+											toastr.success("Poliçe Bilgileri Başarıyla Değiştirildi!");
+											$("#updateModal").modal("hide");
+											loadFilteredPolicies();
+										} else {
+											response.errors.forEach(function (error) {
+										$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+										});
+										}
+									},
+									error: function () {
+										Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+									}
+								});
+							});
+
+						// Delete İçin Ajax ve SweetAlert
+						function confirmDelete(policyId) {
+							Swal.fire({
+								title: 'Poliçe Silinecek ,Emin misiniz?',
+								text: "Bu işlem geri alınamaz!",
+								icon: 'warning',
+								showCancelButton: true,
+								confirmButtonColor: '#d33',
+								cancelButtonColor: '#3085d6',
+								confirmButtonText: 'Evet, sil!',
+								cancelButtonText: 'İptal'
+							}).then((result) => {
+								if (result.isConfirmed) {
+									$.ajax({
+										url: "/Policy/DeletePolicy/" + policyId,
+										method: 'POST',
+										success: function (response) {
+											if (response.success) {
+												toastr.success('Silme İşlemi Başarılı!');
+												loadFilteredPolicies();
+											} else {
+												toastr.error(response.errors.join('\n'));
+											}
+										},
+										error: function () {
+											toastr.error('Bir Hata Oluştu!');
+										}
+									});
+								}
+							});
+						}
+					function toggleFields() {
+						if (document.getElementById("add_1").checked || document.getElementById("add_2").checked ) {
+						document.getElementById("vehicleFields").style.display = "block";
+						document.getElementById("housingFields").style.display = "none";
+					} else if (document.getElementById("add_3").checked || document.getElementById("add_4").checked || document.getElementById("add_5").checked) {
+						document.getElementById("housingFields").style.display = "block";
+						document.getElementById("vehicleFields").style.display = "none";
+								$('#provinceAdd').select2({
+										placeholder: "Seçiniz",
+										allowClear: true,
+										minimumResultsForSearch: 0,
+										dropdownParent: $('#addModal')
+									});
+										$('#districtAdd').select2({
+										placeholder: "Seçiniz",
+										allowClear: true,
+										minimumResultsForSearch: 0,
+										dropdownParent: $('#addModal')
+									});
+										$('#neighborhoodAdd').select2({
+										placeholder: "Seçiniz",
+										allowClear: true,
+										minimumResultsForSearch: 0,
+										dropdownParent: $('#addModal')
+									});
+									$('#countryAdd').val("TÜRKİYE");
+					}
+					else if(document.getElementById("add_6").checked)
+					{
+						document.getElementById("vehicleFields").style.display = "none";
+						document.getElementById("housingFields").style.display = "none";
+					}
+					}
+
+				function toggleField() {
+					if (document.getElementById("update_1").checked || document.getElementById("update_2").checked ) {
+						document.getElementById("vehicleField").style.display = "block";
+						document.getElementById("housingField").style.display = "none";
+					} else if (document.getElementById("update_3").checked || document.getElementById("update_4").checked || document.getElementById("update_5").checked) {
+						document.getElementById("housingField").style.display = "block";
+						document.getElementById("vehicleField").style.display = "none";
+								$('#city').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#updateModal')
+							});
+							$('#district').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#updateModal')
+							});
+							$('#neighbourhood').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#updateModal')
+							});
+					}
+				}
+
+
+				// 		function checkPlate() {
+				// 	let inputValue = $('#plate').val();
+
+				// 	if (inputValue.trim() === "") return; // boşsa devam etme
+
+				// 	$.ajax({
+				// 		url: '/Policy/CheckPlate', // controller'daki kontrol metodu
+				// 		type: 'GET',
+				// 		data: { plate: plate }, // gönderilen veri
+				// 		success: function (exists) {
+				// 			if (exists) {
+				// 				disableVehicleFields(true); // varsa => diğer alanları kapat
+				// 			} else {
+				// 				disableVehicleFields(false); // yoksa => kullanıcı doldurabilir
+				// 			}
+				// 		},
+				// 		error: function () {
+				// 			alert("Plaka kontrolü sırasında bir hata oluştu.");
+				// 		}
+				// 	});
+				// }
+
+				// 	function disableVehicleFields(disable) {
+				// 	let fields = ["Brand", "Model", "ProductionYear", "Color", "Mileage"];
+				// 	fields.forEach(f => {
+				// 		let field = document.getElementsByName(f)[0];
+				// 		if (disable) {
+				// 			field.value = ""; // alanı temizle
+				// 			field.setAttribute("disabled", "disabled"); // pasif yap
+				// 		} else {
+				// 			field.removeAttribute("disabled"); // aktif hale getir
+				// 		}
+				// 	});
+				// }
+
+
+
+			function openInfoModal(button) {
+			var policyInfoList = document.getElementById("policyInfoList");
+			policyInfoList.innerHTML = "";
+
+			var additionalInfoList = document.getElementById("additionalInfo");
+			additionalInfoList.innerHTML = "";
+
+			var id =button.getAttribute("data-id");
+			var agencyName = button.getAttribute("data-agencyname");
+			var pdfUrl = button.getAttribute("data-pdfUrl");
+			var policyNumber = button.getAttribute("data-policynumber");
+			var policyTypeName = button.getAttribute("data-policytypename");
+			var startDate = button.getAttribute("data-startdate");
+			var endDate = button.getAttribute("data-enddate");
+			var grossPremium = button.getAttribute("data-grossPremium");
+			var netPremium = button.getAttribute("data-netPremium");
+			var commission = button.getAttribute("data-commission");
+			var customerName = button.getAttribute("data-customername");
+			var plate = button.getAttribute("data-plate");
+			var brand = button.getAttribute("data-brand");
+			var model = button.getAttribute("data-model");
+			var productionYear = button.getAttribute("data-productionyear");
+			var description = button.getAttribute("data-description");
+			var city = button.getAttribute("data-city");
+			var district = button.getAttribute("data-district");
+			var neighbourhood = button.getAttribute("data-neighbourhood");
+			var street = button.getAttribute("data-street");
+			var doornumber = button.getAttribute("data-doornumber");
+			var postalCode = button.getAttribute("data-postalcode");
+			var country = button.getAttribute("data-country");
+			var constructionYear = button.getAttribute("data-constructionyear");
+			var totalArea = button.getAttribute("data-totalarea");
+			var userName = button.getAttribute("data-username");
+			var docSerialNumber = button.getAttribute("data-docSerialNumber");
+			var buildingCoverageAmount = button.getAttribute("data-buildingCoverageAmount");
+			var furnitureCoverageAmount = button.getAttribute("data-furnitureCoverageAmount");
+
+			var policyInfos = `
+			<div class="table-responsive" style="width: 100%;">
+			  <table class="table table-bordered table-striped">
+				<thead class="table-dark">
+				  <tr>
+					<th style= "text-align:center;">Acente Adı</th>
+					<th style= "text-align:center;  width:120px;">Poliçe No</th>
+					<th style= "text-align:center">Poliçe Türü</th>
+					<th style= "text-align:center">Başlangıç Tarihi</th>
+					<th style= "text-align:center">Bitiş Tarihi</th>
+					<th style= "text-align:center">Müşteri</th>
+					<th style= "text-align:center">Kaydı Yapan Kullanıcı</th>
+				  </tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style= "text-align:center">${agencyName}</td>
+						<td style= "text-align:center">${policyNumber}</td>
+						<td style= "text-align:center">${policyTypeName}</td>
+						<td style= "text-align:center">${startDate}</td>
+						<td style= "text-align:center">${endDate}</td>
+						<td style= "text-align:center">${customerName}</td>
+						<td style= "text-align:center">${userName}</td>
+					</tr>
+				</tbody>
+			  </table>
+			</div>
+			<div class="table-responsive" style="width: 30%;">
+			  <table class="table table-bordered table-striped">
+				<thead class="table-dark">
+				  <tr>
+					<th style= "text-align:center;">Net Prim</th>
+					<th style= "text-align:center">Brüt Prim</th>
+					<th style= "text-align:center">Komisyon</th>
+				  </tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td style= "text-align:center">${netPremium}₺</td>
+						<td style= "text-align:center">${grossPremium}₺</td>
+						<td style= "text-align:center">${commission}₺</td>
+					</tr>
+				</tbody>
+			  </table>
+			</div>
+
+			`;
+			policyInfoList.innerHTML = policyInfos;
+
+			if (plate) {
+				document.getElementById("vehicleOrHousingTitle").innerHTML = `<h5 class="text-center">Araç Bilgileri</h5>`;
+				additionalInfoList.innerHTML = `
+				<div class="table-responsive" style="width: 100%;">
+				  <table class="table table-bordered table-striped">
+					<thead class="table-dark">
+						<tr>
+							<th style= "text-align:center">Plaka</th>
+							<th style= "text-align:center">Marka</th>
+							<th style= "text-align:center">Model</th>
+							<th style= "text-align:center">Yıl</th>
+							<th style= "text-align:center">Belge Seri No</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${plate}</td>
+							<td style= "text-align:center">${brand}</td>
+							<td style= "text-align:center">${model}</td>
+							<td style= "text-align:center">${productionYear}</td>
+							<td style= "text-align:center">${docSerialNumber}</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				  <div class="form-group row mt-2">
+					<div class="col md-8">
+						<strong>Açıklama</strong>
+						<p>${description}</p>
+					</div>
+					<div class="col-md-4">
+						<label>PDF</label>
+						<input type="file" class="form-control" id="addPdf" data-id="${id}" />
+						${pdfUrl ? `<a href="${pdfUrl}" target="_blank" class="btn btn-primary mt-2">PDF'yi Görüntüle</a>` : ''}
+					</div>
+				  </div>
+				`;
+			} else if (country) {
+				document.getElementById("vehicleOrHousingTitle").innerHTML =`<h5 class="text-center">Konut Bilgileri</h5>`;
+				additionalInfoList.innerHTML = `
+				<div class="table-responsive" style="width: 100%;">
+				  <table class="table table-bordered table-striped">
+				  <thead class="table-dark">
+					<tr>
+						<th style= "text-align:center">Ülke</th>
+						<th style= "text-align:center">İl</th>
+						<th style= "text-align:center">İlçe</th>
+						<th style= "text-align:center">Mahalle/Sokak</th>
+						<th style= "text-align:center">Kapı Numarası</th>
+						<th style= "text-align:center">Posta Kodu</th>
+						<th style= "text-align:center">Yapım Yılı</th>
+						<th style= "text-align:center">Toplam Alan</th>
+					</tr>
+				  </thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${country}</td>
+							<td style= "text-align:center">${city}</td>
+							<td style= "text-align:center">${district}</td>
+							<td style= "text-align:center">${neighbourhood}</td>
+							<td style= "text-align:center">${doornumber}</td>
+							<td style= "text-align:center">${postalCode}</td>
+							<td style= "text-align:center">${constructionYear}</td>
+							<td style= "text-align:center">${totalArea}m²</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				<div class="table-responsive" style="width: 30%;">
+				  <table class="table table-bordered table-striped">
+				  <thead class="table-dark">
+					<tr>
+						<th style= "text-align:center">Bina Teminat</th>
+						<th style= "text-align:center">Emtia Teminat</th>
+					</tr>
+				  </thead>
+					<tbody>
+						<tr>
+							<td style= "text-align:center">${buildingCoverageAmount}₺</td>
+							<td style= "text-align:center">${furnitureCoverageAmount}₺</td>
+						</tr>
+					</tbody>
+				  </table>
+				</div>
+				  <div class="form-group row mt-2">
+					<div class="col md-8">
+						<strong>Açıklama</strong>
+						<p>${description}</p>
+					</div>
+					<div class="col-md-4">
+						<label>PDF</label>
+						<input type="file" class="form-control" id="addPdf" data-id="${id}" />
+						${pdfUrl ? `<a href="${pdfUrl}" target="_blank" class="btn btn-primary mt-2">PDF'yi Görüntüle</a>` : ''}
+					</div>
+				  </div>
+				`;
+			} else {
+				// Eğer araç veya konut bilgisi yoksa başlığı ve içeriği boş bırakabilirsin
+				document.getElementById("vehicleOrHousingTitle").textContent = "";
+				additionalInfoList.innerHTML = "";
+			}
+
+			var infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+			infoModal.show();
+		}
+
+
+
+
+
+				$('#updateModal').on('hidden.bs.modal', function () {
+					$('#UpdateForm').find('span[data-valmsg-for]').text('');
+				});
+
+						$('#addModal').on('hidden.bs.modal', function () {
+							$('#AddForm')[0].reset();
+					$('#AddForm').find('span[data-valmsg-for]').text('');
+				});
+
+				$(document).ready(function() {
+							$('#addAgencyId').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#addModal')
+							});
+							$('#addCustomerId').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#addModal'),
+								minimumInputLength:3
+							});
+							$('#updateAgencyId').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#updateModal')
+							});
+							$('#updateCustomerId').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#updateModal'),
+								minimumInputLength:3
+							});
+							$('#policyTypeFilter').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#accordionExample4'),
+								width: '100%'
+							});
+									$('#agencyFilter').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								dropdownParent: $('#accordionExample4'),
+								width: '100%'
+							});
+							$('#customerFilter').select2({
+								placeholder: "Seçiniz",
+								allowClear: true,
+								minimumResultsForSearch: 0,
+								minimumInputLength:3,
+								dropdownParent: $('#accordionExample4'),
+								width: '100%'
+							});
+						});
+				function loadFilteredPolicies(button) {
+					var policyTypeId = $('#policyTypeFilter').val();
+					var agencyId = $('#agencyFilter').val();
+					var customerId = $('#customerFilter').val();
+					var startDateTo = $('#startDateTo').val();
+					var startDateFrom = $('#startDateFrom').val();
+					var endDateTo = $('#endDateTo').val();
+					var endDateFrom = $('#endDateFrom').val();
+					var policyNumber = $('#policyNumberForFilter').val();
+					var plate = $('#plateForFilter').val();
+					var cityId = $('#cityForFilter').val();
+					var districtId = $('#districtForFilter').val();
+					var neighbourhoodId = $('#neighbourhoodForFilter').val();
+					var userId = @Model.UserId;
+
+					$.ajax({
+						url: '/Policy/FilterPolicies',
+						type: 'GET',
+						data: {
+							policyTypeId: policyTypeId,
+							agencyId: agencyId,
+							customerId: customerId,
+							startDateTo: startDateTo,
+							startDateFrom: startDateFrom,
+							endDateTo: endDateTo,
+							endDateFrom : endDateFrom,
+							policyNumber : policyNumber,
+							plate : plate,
+							cityId : cityId,
+							districtId : districtId,
+							neighbourhoodId : neighbourhoodId,
+							userId : userId,
+						},
+						success: function (data) {
+							policyTable.clear().rows.add(data).draw();
+						}
+					});
+				}
+				//Şehir,İl,İlçe için select change --Add Modal
+						 $("#provinceAdd").change(function () {
+							var provinceId = $(this).val();
+							$.getJSON('/Location/GetDistricts?provinceId=' + provinceId, function (data) {
+								var options = '<option value="">İlçe Seçiniz</option>';
+								$.each(data, function (i, item) {
+									options += '<option value="' + item.id + '">' + item.name + '</option>';
+								});
+								$("#districtAdd").html(options);
+								$("#neighborhoodAdd").html('<option value="">Mahalle Seçiniz</option>');
+							});
+						});
+
+						$("#districtAdd").change(function () {
+							var districtId = $(this).val();
+							$.getJSON('/Location/GetNeighborhoods?districtId=' + districtId, function (data) {
+								var options = '<option value="">Mahalle Seçiniz</option>';
+								$.each(data, function (i, item) {
+									options += '<option value="' + item.id + '">' + item.name + '</option>';
+								});
+								$("#neighborhoodAdd").html(options);
+							});
+						});
+
+						//Şehir,İl,İlçe için select change --Update Modal
+								$("#city").change(async function () {
+									const provinceId = $(this).val();
+
+									if (!dontSetDistricts) {
+										try {
+											await getDistricts(provinceId);
+										} catch (error) {
+											console.error("İlçeler yüklenirken hata:", error);
+											}
+										}
+									});
+
+
+								function getDistricts(provinceId) {
+								return new Promise(function (resolve, reject) {
+								$.getJSON('/Location/GetDistricts?provinceId=' + provinceId, function (data) {
+									let options = '<option value="">İlçe Seçiniz</option>';
+									$.each(data, function (i, item) {
+										options += `<option value="${item.id}">${item.name}</option>`;
+									});
+									$("#district").html(options);
+									$("#neighbourhood").html('<option value="">Mahalle Seçiniz</option>');
+									resolve(); // işlem bitti
+									}).fail(function (jqXHR, textStatus, errorThrown) {
+									reject(errorThrown);
+									});
+									});
+								}
+
+
+								$("#district").change(async function () {
+									const districtId = $(this).val();
+									if(!dontSetNeighbourhood) await getNeighbourhoods(districtId);
+								});
+
+								function getNeighbourhoods(districtId) {
+									return new Promise(function (resolve, reject) {
+										$.getJSON('/Location/GetNeighborhoods?districtId=' + districtId, function (data) {
+											let options = '<option value="">Mahalle Seçiniz</option>';
+											$.each(data, function (i, item) {
+												options += `<option value="${item.id}">${item.name}</option>`;
+											});
+											$("#neighbourhood").html(options);
+											resolve();
+										}).fail(function (jqXHR, textStatus, errorThrown) {
+											reject(errorThrown);
+										});
+									});
+								}
+
+
+				$('#updateModal').on('shown.bs.modal', function () {
+					$('#city').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#updateModal')
+					});
+					$('#district').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#updateModal')
+					});
+					$('#neighbourhood').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#updateModal')
+					});
+				});
+
+				var dontSetDistricts = false;
+				var dontSetNeighbourhood = false;
+				async function fillLocationSelects(city, district, neighbourhood) {
+					try {
+						const response = await $.get('/Location/GetLocationIdToName', {
+							city: city,
+							district: district,
+							neighbourhood: neighbourhood
+						});
+
+
+								dontSetDistricts = true;
+								dontSetNeighbourhood = true;
+						$('#city').val(response.cityId).trigger('change');
+
+						await getDistricts(response.cityId);
+
+						$('#district').val(response.districtId).trigger('change');
+
+						await getNeighbourhoods(response.districtId);
+
+						$('#neighbourhood').val(response.neighbourhoodId).trigger('change');
+
+					} catch (error) {
+						console.error("Konumlar yüklenirken hata:", error);
+					}
+					finally {
+
+								dontSetDistricts = false;
+								dontSetNeighbourhood = false;
+					}
+				}
+
+				 $("#cityForFilter").change(function () {
+					var provinceId = $(this).val();
+					$.getJSON('/Location/GetDistricts?provinceId=' + provinceId, function (data) {
+						var options = '<option value="">İlçe Seçiniz</option>';
+						$.each(data, function (i, item) {
+							options += '<option value="' + item.id + '">' + item.name + '</option>';
+						});
+						$("#districtForFilter").html(options);
+						$("#neighbourhoodForFilter").html('<option value="">Mahalle Seçiniz</option>');
+					});
+				});
+
+				$("#districtForFilter").change(function () {
+					var districtId = $(this).val();
+					$.getJSON('/Location/GetNeighborhoods?districtId=' + districtId, function (data) {
+						var options = '<option value="">Mahalle Seçiniz</option>';
+						$.each(data, function (i, item) {
+							options += '<option value="' + item.id + '">' + item.name + '</option>';
+						});
+						$("#neighbourhoodForFilter").html(options);
+					});
+				});
+
+			$(document).on("change", "#addPdf", function () {
+			var fileInput = document.getElementById("addPdf");
+			var file = fileInput.files[0];
+
+			if (!file) {
+				toastr.warning("Lütfen bir dosya seçin.");
+				return;
+			}
+
+			var policyId = $(this).data("id");
+			var formData = new FormData();
+			formData.append("pdfFile", file);
+			formData.append("policyId", policyId);
+
+			$.ajax({
+				type: "POST",
+				url: "/Policy/AddPdfUrl",
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (response) {
+					if (response.success) {
+						toastr.success("PDF başarıyla yüklendi!");
+					} else {
+						toastr.error(response.message || "PDF yüklenemedi.");
+					}
+				},
+				error: function () {
+					Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+				}
+			});
+		});
+
+
+	</script>
+
+}

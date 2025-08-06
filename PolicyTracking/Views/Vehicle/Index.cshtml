@@ -1,0 +1,414 @@
+﻿@using PolicyTracking.ViewModels
+@model VehicleViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+
+<style>
+	h1 {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	table {
+		margin: auto;
+		width: 90%;
+	}
+
+	th, td {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.modal-title {
+		text-align: center;
+		width: 100%;
+	}
+</style>
+<h1>Araçlar</h1>
+<button type="button" class="btn btn-primary mb-2" onclick="openAddModal(this)" style="float:right; width:175px;">Yeni Araç Ekle</button>
+<div class="table-responsive">
+	<table class="table table-bordered table-striped" id="vehicleTable">
+		<thead class="table-dark">
+			<tr>
+				<th style="text-align:center;">Plaka</th>
+				<th style="text-align:center;">Marka</th>
+				<th style="text-align:center;">Model</th>
+				<th style="text-align:center;">Üretim Yılı</th>
+				<th style="text-align:center;">Renk</th>
+				<th style="text-align:center;">Kilometre</th>
+				<th style="text-align:center;">Hangi Müşteriye Ait?</th>
+				<th style="text-align:center;">Durum</th>
+				<th style="text-align:center;">Düzenle</th>
+				<th style ="text-align:center;">Sil</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.Vehicles)
+			{
+				<tr>
+					<td>@item.Plate</td>
+					<td style="text-align:center;">@item.Brand</td>
+					<td>@item.Model</td>
+					<td style="text-align:center;">@item.ProductionYear</td>
+					<td style="text-align:center;">@item.Customer.Name @item.Customer.Surname @item.Customer.CompanyName</td>
+					<td>
+						<label class="badge @(item.Status ? "badge-success" : "badge-danger")">
+							@(item.Status ? "Aktif" : "Pasif")
+						</label>
+					</td>
+					<td>
+						<button class="btn btn-info" type="button" onclick="openUpdateModal(this)" data-id="@item.Id" data-plate="@item.Plate" data-brand="@item.Brand" data-model="@item.Model" 
+						data-productionyear="@item.ProductionYear" data-customerid ="@item.CustomerId" >
+							Düzenle
+						</button>
+					</td>
+					<td>
+						<button type="button" class="btn btn-danger" onclick="confirmDelete(@item.Id)">Sil</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Araç Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="AddForm">
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Araç Plakası</label>
+							<input type="text" class="form-control" name="Plate" placeholder="Plaka" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Plate"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Markası</label>
+							<input type="text" class="form-control" name="Brand" placeholder="Marka" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Brand"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Araç Modeli</label>
+							<input type="text" class="form-control" name="Model" placeholder="Model" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Model"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Üretim Yılı</label>
+							<input type="number" class="form-control" name="ProductionYear" placeholder="Üretim Yılı" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="ProductionYear"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Araç Rengi</label>
+							<input type="text" class="form-control" name="Color" placeholder="Renk" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Color"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Kilometresi</label>
+							<input type="number" class="form-control" name="Mileage" placeholder="Kilometre" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Mileage"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+					<div class="col-md-12">
+						<label>Müşteri</label>
+							<select class="form-control select2" name="CustomerId" id = "addCustomerId" style="width: 100%;">
+							<option value="">Seçiniz</option>
+							@if (Model.CustomerSelect != null)
+							{
+								foreach (var user in Model.CustomerSelect)
+								{
+									<option value="@user.Value">@user.Text</option>
+								}
+							}
+						</select>
+						<span class="text-danger" data-valmsg-for="CustomerId"></span>
+						</div>
+						</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">Araç Düzenle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="UpdateForm">
+					<div class="form-group row">
+						<input name="Id" id ="id" hidden/> 
+						<div class="col md-6">
+							<label>Araç Plakası</label>
+							<input type="text" class="form-control" id ="plate" name="Plate" placeholder="Plaka" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Plate"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Markası</label>
+							<input type="text" class="form-control" id="brand" name="Brand" placeholder="Marka" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Brand"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Araç Modeli</label>
+							<input type="text" class="form-control" id="model" name="Model" placeholder="Model" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Model"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Üretim Yılı</label>
+							<input type="number" class="form-control" id="productionYear" name="ProductionYear" placeholder="Üretim Yılı" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="ProductionYear"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-6">
+							<label>Araç Rengi</label>
+							<input type="text" class="form-control" id="color" name="Color" placeholder="Renk" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Color"></span>
+						</div>
+						<div class="col md-6">
+							<label>Araç Kilometresi</label>
+							<input type="number" class="form-control" id="mileage" name="Mileage" placeholder="Kilometre" autocomplete="off" />
+							<span class="text-danger" data-valmsg-for="Mileage"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-md-6">
+							<label>Müşteri</label>
+							<select class="form-control" name="CustomerId" id ="updateCustomerId" style="width:100%"> 
+								<option value="">Seçiniz</option>
+								@if (Model.CustomerSelect != null)
+								{
+									foreach (var user in Model.CustomerSelect)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="CustomerId"></span>
+						</div>
+						</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts{
+	<script>
+		$(document).ready(function() {
+			$('#vehicleTable').DataTable({
+				dom:  `
+				<"d-flex justify-content-between"
+					<"d-flex align-items-center gap-3"
+						<"ps-1 pe-3"l>
+						B
+					>
+					<"ms-5"f>
+				>
+				<" p-2"rt>
+				<"d-flex justify-content-between"
+					i
+					p
+				>`,
+				buttons: [
+					{
+						extend: 'excelHtml5',
+						text: 'Excel\'e Aktar',
+						titleAttr: 'Excel\'e Aktar',
+						className: 'btn btn-success'
+					},
+					{
+						extend: 'csvHtml5',
+						text: 'CSV\'ye Aktar',
+						titleAttr: 'CSV\'ye Aktar',
+						className: 'btn btn-primary'
+					},
+					{
+						extend: 'print',
+						text: 'Yazdır',
+						titleAttr: 'Yazdır',
+						className: 'btn btn-secondary'
+					}
+				],
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+				}
+			});
+		});
+
+		function openAddModal(button)
+			{
+				$("#addModal").modal("show");
+			};
+		//Add İçin Ajax
+			$("#AddForm").submit(function (e) {
+				e.preventDefault();
+				$('#AddForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/Vehicle/AddVehicle",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Araç Başarıyla Eklendi!");
+							$("#AddForm")[0].reset(); // 🔄 Formu sıfırla
+							$("#addModal").modal("hide");
+								$("#vehicleTable").load(location.href + " #vehicleTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+
+			// Delete İçin Ajax ve SweetAlert
+				function confirmDelete(vehicleId) {
+					Swal.fire({
+						title: 'Araç Silinecek ,Emin misiniz?',
+						text: "Bu işlem geri alınamaz!",
+						icon: 'warning',
+						showCancelButton: true,
+						confirmButtonColor: '#d33',
+						cancelButtonColor: '#3085d6',
+						confirmButtonText: 'Evet, sil!',
+						cancelButtonText: 'İptal'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							$.ajax({
+								url: "/Vehicle/DeleteVehicle/" + vehicleId,
+								method: 'POST',
+								success: function (response) {
+									if (response.success) {
+										toastr.success('Silme İşlemi Başarılı!');
+										$("#vehicleTable").load(location.href + " #vehicleTable");
+									} else {
+										response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+									}
+								},
+								error: function () {
+									toastr.error('Bir Hata Oluştu!');
+								}
+							});
+						}
+					});
+				}
+
+						// İnputları Dolu Getirmesi İçin
+		function openUpdateModal(button) {
+			let id = button.getAttribute("data-id");
+			let Plate = button.getAttribute("data-plate");
+			let Brand = button.getAttribute("data-brand");
+			let ProductionYear = button.getAttribute("data-productionyear");
+			let Model = button.getAttribute("data-model");
+			let Color = button.getAttribute("data-color");
+			let CustomerId = button.getAttribute("data-customerid");
+			let Mileage = button.getAttribute("data-mileage");
+
+			document.getElementById("id").value = id;
+			document.getElementById("plate").value = Plate;
+			document.getElementById("brand").value = Brand;
+			document.getElementById("productionYear").value = ProductionYear;
+			document.getElementById("model").value = Model;
+			document.getElementById("color").value = Color;
+			document.getElementById("mileage").value = Mileage;
+			$('#updateCustomerId').val(CustomerId).trigger('change');
+
+			$("#updateModal").modal("show");
+		};
+
+		// Update İçin Ajax
+			$("#UpdateForm").submit(function (e) {
+				e.preventDefault();
+				$('#UpdateForm').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/Vehicle/EditVehicle",
+					data: $(this).serialize(),
+					dataType: "json", // 🟢 JSON formatında beklediğimizi belirtiyoruz
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Araç Bilgileri Başarıyla Değiştirildi!");
+							$("#updateModal").modal("hide");
+							$("#vehicleTable").load(location.href + " #vehicleTable");
+						} else {
+							response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+						}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+		$('#updateModal').on('hidden.bs.modal', function () {
+		$('#UpdateForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$('#addModal').on('hidden.bs.modal', function () {
+		$('#AddForm')[0].reset();
+		$('#AddForm').find('span[data-valmsg-for]').text('');
+		});
+
+		$(document).ready(function() {
+					$('#addCustomerId').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#addModal')
+					});
+
+					$('#updateCustomerId').select2({
+						placeholder: "Seçiniz",
+						allowClear: true,
+						minimumResultsForSearch: 0,
+						dropdownParent: $('#updateModal')
+					});
+				});
+	</script>
+}
+

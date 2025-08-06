@@ -1,0 +1,164 @@
+﻿@model EntityLayer.Models.UserInformationViewModel
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+
+<div class="form-group row">
+	<div class="col-md-6">
+		<label class="mb-2">Ad</label>
+		<input type="text" class="form-control" placeholder="Adınız" asp-for="@Model.Name" readonly>
+		<span class="text-danger" data-valmsg-for="Name"></span>
+	</div>
+	<div class="col-md-6">
+		<label class="mb-2">Soyad</label>
+		<input type="text" class="form-control" placeholder="Soyadınız" asp-for="@Model.Surname" readonly>
+		<span class="text-danger" data-valmsg-for="Surname"></span>
+	</div>
+</div>
+<div class="form-group row">
+	<div class="col-md-6">
+		<label>Kullanıcı Adı</label>
+		<input type="text" class="form-control" placeholder="Kullanıcı Adı" asp-for="@Model.UserName" readonly>
+		<span class="text-danger" data-valmsg-for="UserName"></span>
+	</div>
+	<div class="col-md-6">
+		<label>E-Mail</label>
+		<input type="text" class="form-control" placeholder="E-Mail" asp-for="@Model.Email" readonly>
+		<span class="text-danger" data-valmsg-for="Mail"></span>
+	</div>
+</div>
+<button class="btn btn-primary" onclick ="openUpdateModal(this)" data-id="@Model.Id">Şifre Değiştir</button>
+
+
+
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" aria-labelledby="passwordChangeModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="passwordChangeModalLabel">Şifre Değiştir</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="changePassword">
+					<input hidden name="Id" id="id" />
+					<input hidden asp-for="@Model.UserName" />
+					<input hidden asp-for="@Model.Name" />
+					<input hidden asp-for="@Model.Surname" />
+					<input hidden asp-for="@Model.Email" />
+					<div class="form-group row">
+						<!-- Eski Şifre -->
+						<div class="col-md-6">
+							<label for="oldPassword">Eski Şifre</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="oldPassword" name="OldPassword" placeholder="Eski Şifre" />
+								<div class="input-group-append">
+									<button class="btn btn-outline-secondary" type="button" onclick="togglePassword('oldPassword')">
+										<i class="fa-solid fa-eye"></i>
+									</button>
+								</div>
+							</div>
+							<span class="text-danger" data-valmsg-for="OldPassword"></span>
+						</div>
+
+						<!-- Yeni Şifre -->
+						<div class="col-md-6">
+							<label for="newPassword">Yeni Şifre</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="newPassword" name="NewPassword" placeholder="Yeni Şifre" />
+								<div class="input-group-append">
+									<button class="btn btn-outline-secondary" type="button" onclick="togglePassword('newPassword')">
+										<i class="fa-solid fa-eye"></i>
+									</button>
+								</div>
+							</div>
+							<span class="text-danger" data-valmsg-for="NewPassword"></span>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-6">
+							<label for="confirmPassword">Yeni Şifre Tekrar</label>
+							<div class="input-group">
+								<input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" placeholder="Yeni Şifre Tekrar" />
+								<div class="input-group-append">
+									<button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword')">
+										<i class="fa-solid fa-eye"></i>
+									</button>
+								</div>
+							</div>
+							<span class="text-danger" data-valmsg-for="ConfirmPassword"></span>
+						</div>
+					</div>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+					<button type="submit" class="btn btn-primary">Kaydet</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section Scripts {
+	<script>
+		// Add İçin Ajax
+			$("#changePassword").submit(function (e) {
+				e.preventDefault();
+				$('#changePassword').on('change keyup', 'input, select', function () {
+				const fieldName = $(this).attr('name');
+				$(`span[data-valmsg-for="${fieldName}"]`).text('');
+				});
+				const $form = $(this);
+
+				$form.find('span[data-valmsg-for]').text('');
+
+				$.ajax({
+					type: "POST",
+					url: "/UserInformations/UpdatePassword",
+					data: $(this).serialize(),
+					dataType: "json",
+					success: function (response) {
+						if (response.success) {
+							toastr.success("Şifre Başarıyla Değiştirildi!");
+							$("#passwordChangeModal").modal("hide");
+						} else {
+								response.errors.forEach(function (error) {
+								$form.find(`span[data-valmsg-for="${error.field}"]`).text(error.message);
+								});
+								}
+					},
+					error: function () {
+						Swal.fire("Hata!", "İşlem sırasında hata oluştu!", "error");
+					}
+				});
+			});
+
+			function openUpdateModal(button) {
+				const userId = $(button).data("id");
+				const email = document.getElementById("Email").value;
+				const username = document.getElementById("UserName").value;
+				const surname = document.getElementById("Surname").value;
+				const name = document.getElementById("Name").value;
+				$("#Email").val(email);
+				$("#id").val(userId);
+				$("#Name").val(name);
+				$("#Surname").val(surname);
+				$("#UserName").val(username);
+				$("#passwordChangeModal").modal("show");
+
+			}
+
+			function togglePassword(passwordId)
+			{
+				const input =document.getElementById(passwordId);
+				if (input.type === "password")
+				{
+					input.type = "text";
+				}
+				else if (input.type === "text")
+				{
+					input.type = "password";
+				}
+			}
+	</script>
+}

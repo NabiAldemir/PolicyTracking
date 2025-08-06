@@ -1,0 +1,222 @@
+﻿@using PolicyTracking.ViewModels
+@model PolicyViewModel
+@{
+	Layout = null;
+}
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel">
+	<div class="modal-dialog modal-lg">
+		<!-- Daha geniş modal -->
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addModalLabel">Poliçe Ekle</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form method="post" id="AddForm">
+					<div class="form-group text-center">
+						<label>Poliçe Türü:</label><br />
+						@foreach (var item in Model.PolicyTypeList)
+						{
+							<input type="radio" id="add_@item.Value" name="SelectedType" value="@item.Value" onchange="toggleFields()" />
+							<label for="add_@item.Text">@item.Text</label>
+						}
+					</div>
+					<div class="form-group text-center">
+						<span class="text-danger" data-valmsg-for="SelectedType"></span>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-3">
+							<label>Acente Adı</label>
+							<select class="form-control select2" name="AgencyId" id="addAgencyId" style="width:100%;">
+								<option value="">Seçiniz</option>
+								@if (Model.AgnncyList != null)
+								{
+									foreach (var user in Model.AgnncyList)
+									{
+										<option value="@user.Value">@user.Text</option>
+									}
+								}
+							</select>
+							<span class="text-danger" data-valmsg-for="AgencyId"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Poliçe Numarası</label>
+							<input type="text" class="form-control" name="PolicyNumber" placeholder="Poliçe Numarası" />
+							<span class="text-danger" data-valmsg-for="PolicyNumber"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Başlangıç Tarihi</label>
+							<input type="date" class="form-control" id="startDate" name="StartDate" placeholder="Başlangıç Tarihi" />
+							<span class="text-danger" data-valmsg-for="StartDate"></span>
+						</div>
+						<div class="col-md-3">
+							<label>Bitiş Tarihi</label>
+							<input type="date" class="form-control" id="endDate" name="EndDate" placeholder="Bitiş Tarihi" />
+							<span class="text-danger" data-valmsg-for="EndDate"></span>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-4">
+							<label>Net Prim</label>
+							<input type="number" class="form-control" name="NetPremium" placeholder="Net Prim" />
+							<span class="text-danger" data-valmsg-for="NetPremium"></span>
+						</div>
+						<div class="col-md-4">
+							<label>Brüt Prim</label>
+							<input type="number" class="form-control" name="GrossPremium"  placeholder="Brüt Prim" />
+							<span class="text-danger" data-valmsg-for="GrossPremium"></span>
+						</div>
+						<div class="col-md-4">
+							<label>Komisyon</label>
+							<input type="number" class="form-control" name="Commission" placeholder="Komisyon" />
+							<span class="text-danger" data-valmsg-for="Commission"></span>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-6">
+								<label>Müşteri</label>
+								<select class="form-control select2" name="CustomerId" id="addCustomerId" style="width:100%;">
+									<option value="">Seçiniz</option>
+									@if (Model.Customers != null)
+									{
+										foreach (var user in Model.Customers)
+										{
+											<option value="@user.Value">@user.Text</option>
+										}
+									}
+								</select>
+								<span class="text-danger" data-valmsg-for="CustomerId"></span>
+							</div>
+						</div>
+					</div>
+
+					<!-- ARAÇ ALANLARI -->
+					<div id="vehicleFields" style="display:none;">
+						<hr />
+						<h5 style="text-align:center;">Araç Bilgileri</h5>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Plaka</label>
+								<input type="text" class="form-control" name="Plate" placeholder="Plaka" onchange="checkPlate()" />
+								<span class="text-danger" data-valmsg-for="Plate"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Marka</label>
+								<input type="text" class="form-control" name="Brand" placeholder="Marka" />
+								<span class="text-danger" data-valmsg-for="Brand"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Model</label>
+								<input type="text" class="form-control" name="Model" placeholder="Model" />
+								<span class="text-danger" data-valmsg-for="Model"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Yıl</label>
+								<input type="number" class="form-control" name="ProductionYear" placeholder="Üretim Yılı" />
+								<span class="text-danger" data-valmsg-for="ProductionYear"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Belge Seri No</label>
+								<input type="text" class="form-control" name="DocSerialNumber" placeholder="Belge Seri No" />
+								<span class="text-danger" data-valmsg-for="DocSerialNumber"></span>
+							</div>
+						</div>
+					</div>
+
+					<!-- KONUT ALANLARI -->
+					<div id="housingFields" style="display:none;">
+						<hr />
+						<h5 style="text-align:center;">Konut Bilgileri</h5>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Ülke</label>
+								<input type="text" class="form-control" name="Country" id="countryAdd" placeholder="Ülke" readonly />
+								<span class="text-danger" data-valmsg-for="Country"></span>
+							</div>
+							<div class="col-md-4">
+								<label>İl</label>
+								<select id="provinceAdd" name="City" class="form-control select2">
+									<option value="">İl Seçiniz</option>
+									@foreach (var province in Model.ProvinceList)
+									{
+										<option value="@province.Value">@province.Text</option>
+									}
+								</select>
+								<span class="text-danger" data-valmsg-for="City"></span>
+							</div>
+							<div class="col-md-4">
+								<label>İlçe</label>
+								<select id="districtAdd" name="District" class="form-control select2">
+									<option value="">İlçe Seçiniz</option>
+								</select>
+								<span class="text-danger" data-valmsg-for="District"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Mahalle/Sokak</label>
+								<select id="neighborhoodAdd" name="Neighbourhood" class="form-control select2">
+									<option value="">Mahalle Seçiniz</option>
+								</select>
+								<span class="text-danger" data-valmsg-for="Neighbourhood"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Cadde</label>
+								<input type="text" class="form-control" name="Street" placeholder="Cadde" />
+								<span class="text-danger" data-valmsg-for="Street"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Door Number</label>
+								<input type="text" class="form-control" name="DoorNumber" placeholder="Kapı Numarası" />
+								<span class="text-danger" data-valmsg-for="DoorNumber"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Posta Kodu</label>
+								<input type="text" class="form-control" name="PostalCode" placeholder="Posta Kodu" />
+								<span class="text-danger" data-valmsg-for="PostalCode"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Yapım Yılı</label>
+								<input type="text" class="form-control" name="ConstructionYear" placeholder="Yapım Yılı" />
+								<span class="text-danger" data-valmsg-for="ConstructionYear"></span>
+							</div>
+							<div class="col-md-4">
+								<label>Toplam Alan (m²)</label>
+								<input type="text" class="form-control" name="TotalArea" placeholder="Alan (m²)" />
+								<span class="text-danger" data-valmsg-for="TotalArea"></span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-md-4">
+								<label>Bina Teminat</label>
+								<input type="text" class="form-control" name="BuildingCoverageAmount" placeholder="Bina Teminat" />
+								<span class="text-danger" data-valmsg-for="BuildingCoverageAmount "></span>
+							</div>
+							<div class="col-md-4">
+								<label>Eşya Teminat</label>
+								<input type="text" class="form-control" name="FurnitureCoverageAmount" placeholder="Eşya Teminat" />
+								<span class="text-danger" data-valmsg-for="FurnitureCoverageAmount  "></span>
+							</div>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col md-12">
+							<label>Açıklama</label>
+							<textarea class="form-control" name="Description" placeholder="Açıklama"></textarea>
+						</div>
+					</div>
+
+					<div class="text-end mt-3">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+						<button type="submit" class="btn btn-primary">Kaydet</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

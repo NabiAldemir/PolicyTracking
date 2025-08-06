@@ -1,0 +1,31 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Customer/Views/Shared/UserLayoutForCustomer.cshtml";
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@ViewBag.policyCount</h3>
+
+                        <p>Poliçelerim</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <a href="/Customer/CustomerDashboard/Index" class="small-box-footer">Daha Fazla Bilgi<i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <!-- ./col -->
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+

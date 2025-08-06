@@ -1,0 +1,35 @@
+﻿@using PolicyTracking.ViewModels
+@model List<NotificationViewModel>
+<!-- Right navbar links -->
+<ul class="navbar-nav ml-auto">
+    <!-- Notifications Dropdown Menu -->
+    <li class="nav-item dropdown">
+        <a class="nav-link" data-bs-toggle="dropdown" href="#">
+            <i class="far fa-bell"></i>
+            <span class="badge badge-warning navbar-badge">@Model.Count</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            @if (Model.Any())
+            {
+                <span class="dropdown-item dropdown-header">@Model.Count Yaklaşan Poliçe</span>
+                <div class="dropdown-divider"></div>
+
+                @foreach (var item in Model)
+                {
+                    <a href="/Notification/Index" class="dropdown-item">
+                        <i class="fas fa-exclamation-triangle mr-2 text-warning"></i>
+                        @item.CustomerName @item.CustomerSurname - @item.PolicyType
+                        <span class="float-right text-muted text-sm">@item.DaysLeft gün kaldı</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                }
+
+                <a href="/Notification/Index" class="dropdown-item dropdown-footer">Tüm Bildirimleri Gör</a>
+            }
+            else
+            {
+                <span class="dropdown-item dropdown-header">Hiç yaklaşan poliçe yok</span>
+            }
+        </div>
+    </li>
+</ul>
